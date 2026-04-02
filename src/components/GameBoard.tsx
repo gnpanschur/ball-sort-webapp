@@ -81,7 +81,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
       {level.id === 12 && gameState.tubes.find(t => t.id === 8) && (
         <div style={{
            position: 'relative',
-           width: `calc(${level.tubeCapacity} * var(--ring-h-mult) + 40px)`,
+           width: `calc(18 * var(--ring-h-mult) + 40px)`,
            height: 'var(--tube-w)',
            margin: '60px auto auto auto', 
            display: 'flex',
@@ -94,7 +94,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
            }}>
               <Tube 
                 tube={gameState.tubes.find(t => t.id === 8)!} 
-                capacity={level.tubeCapacity} 
+                capacity={18} 
                 isSelected={selectedTubeId === 8}
                 onSelect={handleTubeClick}
                 itemShape={level.itemShape}
