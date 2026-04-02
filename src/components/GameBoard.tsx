@@ -76,8 +76,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
 
       {/* Win Modal */}
       {gameState.status === 'won' && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(5px)' }}>
-          <h1 style={{ color: '#00ffcc', fontSize: '4rem', marginBottom: '20px', textShadow: '0 0 20px #00ffcc' }}>Level geschafft!</h1>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(5px)', padding: '20px' }}>
+          <h1 style={{ color: '#00ffcc', fontSize: '4rem', marginBottom: '20px', textShadow: '0 0 20px #00ffcc', textAlign: 'center', lineHeight: '1.2' }}>Level geschafft!</h1>
           <div style={{ fontSize: '1.8rem', marginBottom: '40px', textAlign: 'center' }}>
             <p>Züge: {gameState.moves}</p>
             <p>Zeit: {gameState.timeElapsed}s</p>
