@@ -897,7 +897,7 @@
   },
   {
     "id": 12,
-    "tubeCapacity": 28,
+    "tubeCapacity": 22,
     "itemShape": "ring",
     "timeLimitSeconds": 0,
     "initialTubes": [
