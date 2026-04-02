@@ -155,12 +155,42 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
     setSelectedTubeId(null);
   };
 
+  const shuffleTubes = () => {
+    if (gameState.status !== 'playing') return;
+    setGameState(prev => {
+      const allBalls: number[] = [];
+      prev.tubes.forEach(t => allBalls.push(...t.balls));
+      
+      for (let i = allBalls.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allBalls[i], allBalls[j]] = [allBalls[j], allBalls[i]];
+      }
+
+      let pos = 0;
+      const newTubes = prev.tubes.map(t => {
+        const len = t.balls.length;
+        const newBalls = allBalls.slice(pos, pos + len);
+        pos += len;
+        return { ...t, balls: newBalls };
+      });
+
+      return {
+        ...prev,
+        tubes: newTubes,
+        moves: prev.moves + 1,
+        history: [...prev.history, prev.tubes]
+      };
+    });
+    setSelectedTubeId(null);
+  };
+
   return {
     gameState,
     selectedTubeId,
     handleTubeClick,
     undoMove,
     restartLevel,
+    shuffleTubes,
     setGameState // Exported for timer updates
   };
 }

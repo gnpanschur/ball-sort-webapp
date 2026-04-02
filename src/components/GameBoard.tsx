@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Tube } from './Tube';
 import { useGameEngine } from '../hooks/useGameEngine';
 import type { LevelData } from '../types/game';
-import { Undo2, RotateCcw, Play } from 'lucide-react';
+import { Undo2, RotateCcw, Play, Shuffle } from 'lucide-react';
 
 interface GameBoardProps {
   level: LevelData;
@@ -12,7 +12,7 @@ interface GameBoardProps {
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, onNextLevel, onMove }) => {
-  const { gameState, selectedTubeId, handleTubeClick, undoMove, restartLevel, setGameState } = useGameEngine(level, onMove);
+  const { gameState, selectedTubeId, handleTubeClick, undoMove, restartLevel, shuffleTubes, setGameState } = useGameEngine(level, onMove);
 
   // Timer
   useEffect(() => {
@@ -56,6 +56,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
           </button>
           <button className="hud-icon-btn" onClick={restartLevel} title="Neustart">
             <RotateCcw />
+          </button>
+          <button className="hud-icon-btn" onClick={shuffleTubes} title="Röhrchen neu mischen">
+            <Shuffle />
           </button>
         </div>
       </div>
