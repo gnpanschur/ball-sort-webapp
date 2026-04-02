@@ -1,0 +1,153 @@
+@import './styles/themes.css';
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow: hidden; /* Game is self-contained */
+  user-select: none;
+  touch-action: manipulation;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Base utility classes */
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Typography */
+h1, h2, h3, h4 {
+  font-weight: 700;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: none;
+  color: inherit;
+  transition: transform 0.1s;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Layout & Header */
+.app-header {
+  padding: 15px 30px;
+  background: var(--panel-bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.header-title {
+  margin: 0;
+  font-size: 1.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.main-content {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Game HUD */
+.game-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  padding: 15px 25px;
+  background-color: var(--panel-bg);
+  border-radius: 16px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.hud-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.hud-level-title {
+  font-size: 2rem;
+  margin-bottom: 15px;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+  letter-spacing: 2px;
+}
+
+.hud-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.hud-icon-btn svg {
+  width: 28px;
+  height: 28px;
+}
+
+@media (max-width: 600px) {
+  .app-header {
+    padding: 8px 15px;
+  }
+  .header-title {
+    font-size: 1.3rem;
+  }
+  .main-content {
+    padding: 5px;
+  }
+  .game-hud {
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+  }
+  .hud-level-title {
+    font-size: 1.4rem;
+    margin-bottom: 5px;
+  }
+  .hud-text {
+    font-size: 0.95rem;
+  }
+  .hud-icons {
+    gap: 8px;
+  }
+  .hud-icon-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+  .gameboard-layout {
+    padding: 5px 0 !important;
+  }
+}
+

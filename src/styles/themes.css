@@ -1,0 +1,97 @@
+:root {
+  /* Default Theme: Classic Ball */
+  --bg-color: #1a1a2e;
+  --text-color: #f1f1f1;
+  --tube-color: rgba(255, 255, 255, 0.1);
+  --tube-border: rgba(255, 255, 255, 0.3);
+  
+  --panel-bg: rgba(0, 0, 0, 0.5);
+  --btn-bg: #e43f5a;
+  --btn-bg-hover: #ff5773;
+  --btn-text: #fff;
+
+  /* Ball Colors */
+  --color-1: #ff3366; /* Red */
+  --color-2: #33ccff; /* Blue */
+  --color-3: #66ff66; /* Green */
+  --color-4: #ffcc00; /* Yellow */
+  --color-5: #cc66ff; /* Purple */
+  --color-6: #ff9933; /* Orange */
+  --color-7: #00ffff; /* Cyan */
+  --color-8: #ff66b2; /* Pink */
+  --color-9: #999966; /* Olive */
+  --color-10: #ffffff; /* White */
+  --color-11: #993300; /* Brown */
+  --color-12: #a0a0a0; /* Gray */
+}
+
+/* Glass Theme */
+[data-theme='glass'] {
+  --bg-color: #0f172a;
+  --tube-color: rgba(255, 255, 255, 0.05);
+  --tube-border: rgba(255, 255, 255, 0.8);
+  --panel-bg: rgba(15, 23, 42, 0.7);
+  --btn-bg: rgba(255, 255, 255, 0.1);
+  --btn-bg-hover: rgba(255, 255, 255, 0.2);
+}
+
+/* Neon Theme */
+[data-theme='neon'] {
+  --bg-color: #000000;
+  --tube-color: transparent;
+  --tube-border: #00ffcc;
+  --panel-bg: rgba(0, 0, 0, 0.8);
+  --btn-bg: transparent;
+  --btn-bg-hover: #00ffcc;
+  
+  /* Overwrite ball colors to be more neon */
+  --color-1: #ff0055;
+  --color-2: #00e5ff;
+  --color-3: #39ff14;
+  --color-4: #ffea00;
+  --color-5: #b026ff;
+  --color-6: #ff6600;
+}
+
+/* Gems Theme */
+[data-theme='gems'] {
+  --bg-color: #2b1b3d;
+  --tube-color: rgba(0, 0, 0, 0.2);
+  --tube-border: #d4af37; /* Gold */
+  --panel-bg: rgba(43, 27, 61, 0.8);
+  --btn-bg: #8a2be2;
+  --btn-bg-hover: #9b4cf0;
+}
+
+/* Casino Theme */
+[data-theme='casino'] {
+  --bg-color: #0b5d1e; /* Classic felt green */
+  --tube-color: rgba(0, 0, 0, 0.3);
+  --tube-border: #d4af37; /* Gold */
+  --panel-bg: rgba(0, 30, 0, 0.6);
+  --btn-bg: #8b0000; /* Dark red chips/cards */
+  --btn-bg-hover: #b20000;
+}
+
+/* Responsive Sizing (Mobile scaling for 5 tubes per row) */
+:root {
+  --tube-w: 64px;
+  --ball-s: 40px;
+  --ball-font: 16px;
+  --ball-margin: 2px auto;
+  --tube-h-mult: 44px;
+  --ring-h-mult: 18px;
+  --tube-gap: 20px;
+}
+
+@media (max-width: 600px) {
+  :root {
+    --tube-w: 11.5vw;
+    --ball-s: 9.5vw;
+    --ball-font: 4vw;
+    --ball-margin: 1vw auto;
+    --tube-h-mult: 11.5vw; 
+    --ring-h-mult: 4.5vw;
+    --tube-gap: 1.5vw;
+  }
+}
