@@ -29,18 +29,23 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
     if (gameState.status !== 'playing' || gameState.tubes.length === 0) return;
 
     let isWin = true;
+    const seenColors = new Set();
+    
     for (const t of gameState.tubes) {
       if (t.balls.length > 0) {
-        if (t.balls.length !== level.tubeCapacity) {
-          isWin = false;
-          break;
-        }
         // Check if all balls in tube are the same color
         const firstColor = t.balls[0];
         if (!t.balls.every(b => b === firstColor)) {
           isWin = false;
           break;
         }
+        
+        // Check if we already saw this color in another tube
+        if (seenColors.has(firstColor)) {
+          isWin = false;
+          break;
+        }
+        seenColors.add(firstColor);
       }
     }
 
