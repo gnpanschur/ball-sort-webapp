@@ -64,8 +64,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
       </div>
 
       {/* Tubes Area */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 'var(--tube-gap)', marginTop: 'auto', marginBottom: 'auto' }}>
-        {gameState.tubes.map(tube => (
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 'var(--tube-gap)', marginTop: 'auto', marginBottom: level.id === 12 ? '0' : 'auto' }}>
+        {gameState.tubes.filter(t => !(level.id === 12 && t.id === 8)).map(tube => (
           <Tube 
             key={tube.id} 
             tube={tube} 
@@ -76,6 +76,32 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
           />
         ))}
       </div>
+
+      {/* Horizontal Tube for Level 12 */}
+      {level.id === 12 && gameState.tubes.find(t => t.id === 8) && (
+        <div style={{
+           position: 'relative',
+           width: `calc(${level.tubeCapacity} * var(--ring-h-mult) + 40px)`,
+           height: 'var(--tube-w)',
+           margin: '60px auto auto auto', 
+           display: 'flex',
+           justifyContent: 'center',
+           alignItems: 'center'
+        }}>
+           <div style={{
+              position: 'absolute',
+              transform: 'rotate(-90deg)'
+           }}>
+              <Tube 
+                tube={gameState.tubes.find(t => t.id === 8)!} 
+                capacity={level.tubeCapacity} 
+                isSelected={selectedTubeId === 8}
+                onSelect={handleTubeClick}
+                itemShape={level.itemShape}
+              />
+           </div>
+        </div>
+      )}
 
       {/* Win Modal */}
       {gameState.status === 'won' && (
