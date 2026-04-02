@@ -40,7 +40,7 @@ function App() {
       const isNewBestTime = !p.bestTimes[currentLevelId] || p.bestTimes[currentLevelId] > time;
       const isNewBestMoves = !p.bestMoves[currentLevelId] || p.bestMoves[currentLevelId] > moves;
       
-      const newHighest = Math.max(p.highestLevel, currentLevelId + 1 > 10 ? 10 : currentLevelId + 1);
+      const newHighest = Math.max(p.highestLevel, currentLevelId + 1 > levelsData.length ? levelsData.length : currentLevelId + 1);
       
       return {
         ...p,
@@ -54,7 +54,7 @@ function App() {
 
   const handleNextLevel = () => {
     playClick();
-    if (currentLevelId < 10) {
+    if (currentLevelId < levelsData.length) {
       setCurrentLevelId(currentLevelId + 1);
     } else {
       setCurrentView('menu'); // Game Finished basically
@@ -67,7 +67,7 @@ function App() {
       <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', background: 'var(--panel-bg)', borderRadius: '16px' }}>
         <h2>Rangliste (Level {currentLevelId})</h2>
         <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '20px' }}>
-          {Array.from({length: 10}).map((_, i) => (
+          {Array.from({length: levelsData.length}).map((_, i) => (
              <button key={i} onClick={() => { playClick(); setCurrentLevelId(i+1); }} style={{ padding: '5px 15px', background: currentLevelId === i + 1 ? 'var(--btn-bg-hover)' : 'var(--btn-bg)', borderRadius: '8px' }}>
                L{i+1}
              </button>
