@@ -104,12 +104,9 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
                         (targetTube.balls.length === 0 || targetTube.balls[targetTube.balls.length - 1] === topBallColor);
         
         if (canMove) {
-           // Move all contiguous balls, or as many as fit in the target
-           const ballsToMove = Math.min(movableCount, availableSpace);
-           for (let i = 0; i < ballsToMove; i++) {
-             sourceTube.balls.pop();
-             targetTube.balls.push(topBallColor);
-           }
+           // Move exactly one ball (matching the visual animation of raising only one ball)
+           const topBall = sourceTube.balls.pop()!;
+           targetTube.balls.push(topBall);
            
            if (onMove) {
              onMove();
