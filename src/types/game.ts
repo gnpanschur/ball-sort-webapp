@@ -11,6 +11,8 @@ export interface LevelData {
   initialTubes: TubeData[];
   timeLimitSeconds?: number;
   itemShape?: 'ball' | 'ring';
+  horizontalTubeId?: number;
+  horizontalTubeCapacity?: number;
 }
 
 export interface GameState {

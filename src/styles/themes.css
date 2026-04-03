@@ -4,25 +4,37 @@
   --text-color: #f1f1f1;
   --tube-color: rgba(255, 255, 255, 0.1);
   --tube-border: rgba(255, 255, 255, 0.3);
-  
+
   --panel-bg: rgba(0, 0, 0, 0.5);
   --btn-bg: #e43f5a;
   --btn-bg-hover: #ff5773;
   --btn-text: #fff;
 
   /* Ball Colors */
-  --color-1: #ff3366; /* Red */
-  --color-2: #eaf6ff; /* Pale Blue (Fast Weiß) */
-  --color-3: #66ff66; /* Green */
-  --color-4: #ffcc00; /* Yellow */
-  --color-5: #cc66ff; /* Purple */
-  --color-6: #ff9933; /* Orange */
-  --color-7: #00ffff; /* Cyan */
-  --color-8: #ff66b2; /* Pink */
-  --color-9: #999966; /* Olive */
-  --color-10: #ffffff; /* White */
-  --color-11: #993300; /* Brown */
-  --color-12: #a0a0a0; /* Gray */
+  --color-1: #ff3366;
+  /* Red */
+  --color-2: #cad0d4;
+  /* Pale Blue (Fast Weiß) */
+  --color-3: #66ff66;
+  /* Green */
+  --color-4: #f3db7c;
+  /* Yellow */
+  --color-5: #cc66ff;
+  /* Purple */
+  --color-6: #ff9933;
+  /* Orange */
+  --color-7: #00ffff;
+  /* Cyan */
+  --color-8: #ff66b2;
+  /* Pink */
+  --color-9: #999966;
+  /* Olive */
+  --color-10: #ffffff;
+  /* White */
+  --color-11: #993300;
+  /* Brown */
+  --color-12: #a0a0a0;
+  /* Gray */
 }
 
 /* Glass Theme */
@@ -43,7 +55,7 @@
   --panel-bg: rgba(0, 0, 0, 0.8);
   --btn-bg: transparent;
   --btn-bg-hover: #00ffcc;
-  
+
   /* Overwrite ball colors to be more neon */
   --color-1: #ff0055;
   --color-2: #00e5ff;
@@ -57,7 +69,8 @@
 [data-theme='gems'] {
   --bg-color: #2b1b3d;
   --tube-color: rgba(0, 0, 0, 0.2);
-  --tube-border: #d4af37; /* Gold */
+  --tube-border: #d4af37;
+  /* Gold */
   --panel-bg: rgba(43, 27, 61, 0.8);
   --btn-bg: #8a2be2;
   --btn-bg-hover: #9b4cf0;
@@ -65,11 +78,14 @@
 
 /* Casino Theme */
 [data-theme='casino'] {
-  --bg-color: #0b5d1e; /* Classic felt green */
+  --bg-color: #0b5d1e;
+  /* Classic felt green */
   --tube-color: rgba(0, 0, 0, 0.3);
-  --tube-border: #d4af37; /* Gold */
+  --tube-border: #d4af37;
+  /* Gold */
   --panel-bg: rgba(0, 30, 0, 0.6);
-  --btn-bg: #8b0000; /* Dark red chips/cards */
+  --btn-bg: #8b0000;
+  /* Dark red chips/cards */
   --btn-bg-hover: #b20000;
 }
 
@@ -90,7 +106,7 @@
     --ball-s: 9.5vw;
     --ball-font: 4vw;
     --ball-margin: 1vw auto;
-    --tube-h-mult: 11.5vw; 
+    --tube-h-mult: 11.5vw;
     --ring-h-mult: 4.5vw;
     --tube-gap: 1.5vw;
   }

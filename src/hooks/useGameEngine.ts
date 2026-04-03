@@ -94,7 +94,9 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
             else break;
         }
 
-        const targetMaxCapacity = (level.id === 12 && targetTube.id === 8) ? 18 : level.tubeCapacity;
+        const targetMaxCapacity = (level.horizontalTubeId === targetTube.id) 
+            ? (level.horizontalTubeCapacity ?? level.tubeCapacity) 
+            : level.tubeCapacity;
         const availableSpace = targetMaxCapacity - targetTube.balls.length;
         
         // Validation rules: target must have space AND (target is empty OR top ball matches)

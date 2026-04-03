@@ -64,8 +64,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
       </div>
 
       {/* Tubes Area */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 'var(--tube-gap)', marginTop: 'auto', marginBottom: level.id === 12 ? '0' : 'auto' }}>
-        {gameState.tubes.filter(t => !(level.id === 12 && t.id === 8)).map(tube => (
+      <div style={{ 
+        display: 'flex', 
+        flexWrap: 'wrap', 
+        justifyContent: 'center', 
+        gap: 'var(--tube-gap)', 
+        marginTop: 'auto', 
+        marginBottom: level.horizontalTubeId ? '0' : 'auto' 
+      }}>
+        {gameState.tubes.filter(t => t.id !== level.horizontalTubeId).map(tube => (
           <Tube 
             key={tube.id} 
             tube={tube} 
@@ -77,11 +84,11 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
         ))}
       </div>
 
-      {/* Horizontal Tube for Level 12 */}
-      {level.id === 12 && gameState.tubes.find(t => t.id === 8) && (
+      {/* Optional Horizontal Tube (Generic) */}
+      {level.horizontalTubeId && gameState.tubes.find(t => t.id === level.horizontalTubeId) && (
         <div style={{
            position: 'relative',
-           width: `calc(18 * var(--ring-h-mult) + 40px)`,
+           width: `calc(${level.horizontalTubeCapacity ?? level.tubeCapacity} * var(--ring-h-mult) + 40px)`,
            height: 'var(--tube-w)',
            margin: '60px auto auto auto', 
            display: 'flex',
@@ -93,9 +100,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
               transform: 'rotate(-90deg)'
            }}>
               <Tube 
-                tube={gameState.tubes.find(t => t.id === 8)!} 
-                capacity={18} 
-                isSelected={selectedTubeId === 8}
+                tube={gameState.tubes.find(t => t.id === level.horizontalTubeId)!} 
+                capacity={level.horizontalTubeCapacity ?? level.tubeCapacity} 
+                isSelected={selectedTubeId === level.horizontalTubeId}
                 onSelect={handleTubeClick}
                 itemShape={level.itemShape}
               />

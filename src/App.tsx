@@ -4,7 +4,7 @@ import type { LevelData, UserProfile, ThemeType, GameMode } from './types/game';
 import { storageService } from './services/storageService';
 import { useAudio } from './hooks/useAudio';
 import { GameBoard } from './components/GameBoard';
-import { Settings, Trophy, PlayCircle, Power, X, Maximize } from 'lucide-react';
+import { Settings, Trophy, PlayCircle, X, Maximize } from 'lucide-react';
 
 const toggleFullscreen = () => {
   if (!document.fullscreenElement) {
@@ -149,6 +149,30 @@ function App() {
       <header className="app-header">
         <h1 className="header-title">Ball Sort</h1>
         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+          <select 
+            value={currentLevelId} 
+            onChange={(e) => { 
+              const id = parseInt(e.target.value);
+              setCurrentLevelId(id);
+              setCurrentView('game');
+              playClick();
+            }}
+            style={{ 
+              padding: '8px 12px', 
+              borderRadius: '12px', 
+              background: 'var(--panel-bg)', 
+              color: 'var(--text-color)', 
+              border: '1px solid var(--tube-border)',
+              cursor: 'pointer',
+              fontSize: '14px',
+              outline: 'none'
+            }}
+            title="Level auswählen (Test)"
+          >
+            {levelsData.map(l => (
+              <option key={l.id} value={l.id}>Level {l.id}</option>
+            ))}
+          </select>
           <button 
             onClick={toggleFullscreen} 
             title="Vollbild" 
@@ -209,19 +233,12 @@ function App() {
               <Settings size={24} /> Einstellungen
             </button>
 
-            <button 
-              onClick={() => { playClick(); window.close(); }} 
-              style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', fontSize: '1.2rem', padding: '15px', background: 'rgba(255, 50, 50, 0.2)', border: '2px solid rgba(255, 50, 50, 0.5)', borderRadius: '12px', marginTop: '10px', transition: 'background 0.2s', cursor: 'pointer' }}
-              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 50, 50, 0.4)'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 50, 50, 0.2)'}
-            >
-              <Power size={24} color="#ff3366" /> <span style={{ color: '#ff3366' }}>Beenden</span>
-            </button>
           </div>
         )}
 
         {currentView === 'game' && currentLevel && (
           <GameBoard 
+             key={currentLevelId}
              level={{
                ...currentLevel, 
                timeLimitSeconds: profile.gameMode === 'relaxed' ? undefined : currentLevel.timeLimitSeconds
