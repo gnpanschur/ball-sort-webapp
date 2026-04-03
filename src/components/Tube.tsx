@@ -35,10 +35,8 @@ export const Tube: React.FC<TubeProps> = ({ tube, isSelected, onSelect, capacity
         paddingTop: '5px',
         margin: '0',
         cursor: 'pointer',
-        transform: isSelected ? 'translateY(-20px)' : 'none',
-        transition: 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-        boxShadow: isSelected ? '0px 15px 25px rgba(0,0,0,0.6)' : 'none',
-        position: 'relative'
+        position: 'relative',
+        transition: 'all 0.2s ease'
       }}
     >
       {/* Invisible padding for the empty space from top */}
@@ -48,7 +46,18 @@ export const Tube: React.FC<TubeProps> = ({ tube, isSelected, onSelect, capacity
       
       {/* Render actual balls (top to bottom) */}
       {displayBalls.map((b, i) => (
-        <div key={`ball-${i}`} style={{ height: itemHeightVar, width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div 
+          key={`ball-${i}`} 
+          style={{ 
+            height: itemHeightVar, 
+            width: '100%', 
+            display: 'flex', 
+            justifyContent: 'center',
+            transform: (i === 0 && isSelected) ? 'translateY(-25px)' : 'none',
+            transition: 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            zIndex: (i === 0 && isSelected) ? 10 : 1
+          }}
+        >
           <Ball colorId={b} shape={itemShape} />
         </div>
       ))}
