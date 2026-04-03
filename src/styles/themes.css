@@ -111,3 +111,12 @@
     --tube-gap: 1.5vw;
   }
 }
+
+@keyframes ball-fall {
+  from {
+    transform: translateY(var(--fall-distance));
+  }
+  to {
+    transform: translateY(0);
+  }
+}

@@ -21,6 +21,11 @@ export interface GameState {
   timeElapsed: number;
   status: 'playing' | 'won';
   history: TubeData[][];
+  lastMove?: {
+    targetTubeId: number;
+    count: number;
+    timestamp: number;
+  };
 }
 
 export type ThemeType = 'ball' | 'glass' | 'neon' | 'gems' | 'casino';

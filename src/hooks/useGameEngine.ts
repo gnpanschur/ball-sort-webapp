@@ -19,7 +19,8 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
       moves: 0,
       timeElapsed: 0,
       status: 'playing',
-      history: []
+      history: [],
+      lastMove: undefined
     });
     setSelectedTubeId(null);
   }, [level.id]); // Reload on level change
@@ -104,9 +105,12 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
                         (targetTube.balls.length === 0 || targetTube.balls[targetTube.balls.length - 1] === topBallColor);
         
         if (canMove) {
-           // Move exactly one ball (matching the visual animation of raising only one ball)
-           const topBall = sourceTube.balls.pop()!;
-           targetTube.balls.push(topBall);
+           // Move all contiguous balls, or as many as fit in the target
+           const ballsToMove = Math.min(movableCount, availableSpace);
+           for (let i = 0; i < ballsToMove; i++) {
+             sourceTube.balls.pop();
+             targetTube.balls.push(topBallColor);
+           }
            
            if (onMove) {
              onMove();
@@ -116,7 +120,12 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
              ...prevState,
              tubes: newTubes,
              moves: prevState.moves + 1,
-             history: [...prevState.history, prevState.tubes] // Save prev tubes for Undo
+             history: [...prevState.history, prevState.tubes],
+             lastMove: {
+                targetTubeId: id,
+                count: ballsToMove,
+                timestamp: Date.now()
+             }
            };
         }
         
@@ -150,7 +159,8 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
       moves: 0,
       timeElapsed: 0,
       status: 'playing',
-      history: []
+      history: [],
+      lastMove: undefined
     });
     setSelectedTubeId(null);
   };

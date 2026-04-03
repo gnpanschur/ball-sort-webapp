@@ -80,6 +80,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
             isSelected={selectedTubeId === tube.id}
             onSelect={handleTubeClick}
             itemShape={level.itemShape}
+            lastMove={gameState.lastMove}
           />
         ))}
       </div>
@@ -105,6 +106,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
                 isSelected={selectedTubeId === level.horizontalTubeId}
                 onSelect={handleTubeClick}
                 itemShape={level.itemShape}
+                lastMove={gameState.lastMove}
               />
            </div>
         </div>
