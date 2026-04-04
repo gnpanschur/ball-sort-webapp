@@ -10,9 +10,10 @@ interface GameBoardProps {
   onNextLevel: () => void;
   onMove?: () => void;
   onTubeComplete?: () => void;
+  onWin?: () => void;
 }
 
-export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, onNextLevel, onMove, onTubeComplete }) => {
+export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, onNextLevel, onMove, onTubeComplete, onWin }) => {
   const { gameState, selectedTubeId, handleTubeClick, undoMove, restartLevel, shuffleTubes, setGameState } = useGameEngine(level, onMove);
   const [showWinModal, setShowWinModal] = useState(false);
 
@@ -41,6 +42,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
     }
     if (gameState.status === 'won' && !winTriggeredRef.current) {
       winTriggeredRef.current = true;
+      
+      // Trigger the "Win started" sound/event immediately
+      if (onWin) onWin();
+
       // Start a 3-second delay before showing the "Level Complete" modal
       const timer = setTimeout(() => {
         setShowWinModal(true);

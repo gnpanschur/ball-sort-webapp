@@ -31,8 +31,7 @@ function App() {
   const currentLevel = levelsData.find((l) => l.id === currentLevelId) as LevelData;
 
   const handleLevelComplete = (moves: number, time: number) => {
-    playWin();
-    
+    // Score submission only now (sound triggered early in onWin)    
     // Submit score
     storageService.submitScore('Spieler1', currentLevelId, time, moves); 
 
@@ -247,6 +246,7 @@ function App() {
              onNextLevel={handleNextLevel} 
              onMove={playPour}
              onTubeComplete={playTubeComplete}
+             onWin={playWin}
           />
         )}
 

@@ -42,7 +42,7 @@ export const Tube: React.FC<TubeProps> = ({ tube, isSelected, onSelect, capacity
   const isTargetTube = lastMove?.targetTubeId === tube.id;
   
   // Fireworks Logic
-  const showFireworks = lastCompletedTube?.id === tube.id && (Date.now() - lastCompletedTube.timestamp < 2000);
+  const showFireworks = lastCompletedTube?.id === tube.id && (Date.now() - lastCompletedTube.timestamp < 3000);
   const fireworkColor = tube.balls.length > 0 ? `var(--color-${tube.balls[0]})` : '#fff';
 
   return (

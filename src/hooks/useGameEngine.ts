@@ -32,14 +32,65 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
 
     let isWin = true;
     
+    // Count total required balls for each color in the level
+    const colorCounts: Record<number, number> = {};
+    level.initialTubes.forEach(t => t.balls.forEach(b => {
+      colorCounts[b] = (colorCounts[b] || 0) + 1;
+    }));
+
+    // Group current tubes by their contents
+    const tubeContents: Record<number, { count: number; capacity: number; isPure: boolean }[]> = {};
     for (const t of gameState.tubes) {
       if (t.balls.length > 0) {
-        // Check if all balls in tube are the same color
         const firstColor = t.balls[0];
-        if (!t.balls.every(b => b === firstColor)) {
+        const isPure = t.balls.every(b => b === firstColor);
+        const capacity = (level.horizontalTubeId === t.id) 
+           ? (level.horizontalTubeCapacity ?? level.tubeCapacity) 
+           : level.tubeCapacity;
+
+        if (!tubeContents[firstColor]) tubeContents[firstColor] = [];
+        tubeContents[firstColor].push({ count: t.balls.length, capacity, isPure });
+      }
+    }
+
+    // Check every color present in the level
+    for (const colorStr of Object.keys(colorCounts)) {
+      const color = parseInt(colorStr);
+      const totalBalls = colorCounts[color];
+      const colorTubes = tubeContents[color] || [];
+
+      // Every ball of this color must be in a PURE tube
+      if (!colorTubes.every(ct => ct.isPure)) {
+        isWin = false;
+        break;
+      }
+
+      // Check if total balls in pure tubes match total balls in level
+      const ballsInPureTubes = colorTubes.reduce((sum, ct) => sum + ct.count, 0);
+      if (ballsInPureTubes !== totalBalls) {
+        isWin = false; // Some balls are in mixed tubes or elsewhere
+        break;
+      }
+
+      // Verify colors are "Optimally Stacked"
+      // They must fill as many tubes as possible to their maximum capacity.
+      let remainingBalls = totalBalls;
+      // Sort tubes by capacity (descending) to fill the largest ones first?
+      // Actually, any full tube works.
+      const sortedTubes = [...colorTubes].sort((a, b) => b.count - a.count);
+      
+      for (const ct of sortedTubes) {
+        const fillAmount = Math.min(remainingBalls, level.winHeight || ct.capacity);
+        if (ct.count !== fillAmount) {
           isWin = false;
           break;
         }
+        remainingBalls -= fillAmount;
+      }
+      
+      if (!isWin || remainingBalls > 0) {
+        isWin = false;
+        break;
       }
     }
 

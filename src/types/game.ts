@@ -14,6 +14,7 @@ export interface LevelData {
   horizontalTubeId?: number;
   horizontalTubeCapacity?: number;
   moveSingleBallOnly?: boolean;
+  winHeight?: number;
 }
 
 export interface GameState {

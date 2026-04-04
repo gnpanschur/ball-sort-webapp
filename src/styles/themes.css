@@ -128,7 +128,7 @@
   left: 50%;
   pointer-events: none;
   z-index: 100;
-  animation: firework-burst 2s ease-out forwards;
+  animation: firework-burst 3s ease-out forwards;
 }
 
 @keyframes firework-burst {
