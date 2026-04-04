@@ -13,6 +13,7 @@ export interface LevelData {
   itemShape?: 'ball' | 'ring';
   horizontalTubeId?: number;
   horizontalTubeCapacity?: number;
+  moveSingleBallOnly?: boolean;
 }
 
 export interface GameState {

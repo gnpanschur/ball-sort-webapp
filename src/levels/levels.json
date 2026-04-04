@@ -1333,6 +1333,7 @@
     "id": 17,
     "tubeCapacity": 5,
     "timeLimitSeconds": 0,
+    "moveSingleBallOnly": true,
     "initialTubes": [
       {
         "id": 1,

@@ -83,9 +83,13 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
         
         // Count how many connected balls of the same color are on top
         let movableCount = 0;
-        for (let i = sourceTube.balls.length - 1; i >= 0; i--) {
-            if (sourceTube.balls[i] === topBallColor) movableCount++;
-            else break;
+        if (level.moveSingleBallOnly) {
+            movableCount = 1;
+        } else {
+            for (let i = sourceTube.balls.length - 1; i >= 0; i--) {
+                if (sourceTube.balls[i] === topBallColor) movableCount++;
+                else break;
+            }
         }
 
         const targetMaxCapacity = (level.horizontalTubeId === targetTube.id) 
