@@ -32,10 +32,12 @@ export function useAudio(profile: UserProfile) {
   
   const winAudioRef = useRef<HTMLAudioElement | null>(null);
   const pourAudioRef = useRef<HTMLAudioElement | null>(null);
+  const tubeCompleteAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     winAudioRef.current = new Audio('/AudioFiles/applause.mp3');
     pourAudioRef.current = new Audio('/AudioFiles/BilliardsBall.mp3');
+    tubeCompleteAudioRef.current = new Audio('/AudioFiles/FadeAway.mp3');
   }, []);
 
   const playClick = useCallback(() => {
@@ -70,5 +72,15 @@ export function useAudio(profile: UserProfile) {
     } catch (e) {}
   }, [isEnabled, vol]);
 
-  return { playClick, playPour, playError, playWin };
+  const playTubeComplete = useCallback(() => {
+    if (!isEnabled || !tubeCompleteAudioRef.current) return;
+    try {
+       const audio = tubeCompleteAudioRef.current;
+       audio.volume = vol;
+       audio.currentTime = 0;
+       audio.play().catch(e => console.log('Audio blocked', e));
+    } catch (e) {}
+  }, [isEnabled, vol]);
+
+  return { playClick, playPour, playError, playWin, playTubeComplete };
 }

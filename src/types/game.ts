@@ -26,6 +26,10 @@ export interface GameState {
     count: number;
     timestamp: number;
   };
+  lastCompletedTube?: {
+    id: number;
+    timestamp: number;
+  };
 }
 
 export type ThemeType = 'ball' | 'glass' | 'neon' | 'gems' | 'casino';

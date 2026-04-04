@@ -20,7 +20,7 @@ function App() {
   const [currentLevelId, setCurrentLevelId] = useState<number>(profile.highestLevel);
   const [currentView, setCurrentView] = useState<'menu' | 'game' | 'leaderboard' | 'settings'>('menu');
 
-  const { playClick, playWin, playPour } = useAudio(profile);
+  const { playClick, playWin, playPour, playTubeComplete } = useAudio(profile);
 
   // Sync profile to storage and DOM
   useEffect(() => {
@@ -246,6 +246,7 @@ function App() {
              onLevelComplete={handleLevelComplete} 
              onNextLevel={handleNextLevel} 
              onMove={playPour}
+             onTubeComplete={playTubeComplete}
           />
         )}
 

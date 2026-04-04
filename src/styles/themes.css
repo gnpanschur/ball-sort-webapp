@@ -120,3 +120,24 @@
     transform: translateY(0);
   }
 }
+
+/* Fireworks Effect */
+.firework-particle {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  pointer-events: none;
+  z-index: 100;
+  animation: firework-burst 2s ease-out forwards;
+}
+
+@keyframes firework-burst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--x), var(--y)) scale(0);
+    opacity: 0;
+  }
+}

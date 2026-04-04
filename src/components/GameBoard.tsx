@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Tube } from './Tube';
 import { useGameEngine } from '../hooks/useGameEngine';
 import type { LevelData } from '../types/game';
@@ -9,10 +9,19 @@ interface GameBoardProps {
   onLevelComplete: (moves: number, time: number) => void;
   onNextLevel: () => void;
   onMove?: () => void;
+  onTubeComplete?: () => void;
 }
 
-export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, onNextLevel, onMove }) => {
+export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, onNextLevel, onMove, onTubeComplete }) => {
   const { gameState, selectedTubeId, handleTubeClick, undoMove, restartLevel, shuffleTubes, setGameState } = useGameEngine(level, onMove);
+  const [showWinModal, setShowWinModal] = useState(false);
+
+  // Trigger tube complete sound
+  useEffect(() => {
+    if (gameState.lastCompletedTube && onTubeComplete) {
+      onTubeComplete();
+    }
+  }, [gameState.lastCompletedTube, onTubeComplete]);
 
   // Timer
   useEffect(() => {
@@ -28,10 +37,16 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
   useEffect(() => {
     if (gameState.status === 'playing') {
       winTriggeredRef.current = false;
+      setShowWinModal(false);
     }
     if (gameState.status === 'won' && !winTriggeredRef.current) {
       winTriggeredRef.current = true;
-      onLevelComplete(gameState.moves, gameState.timeElapsed);
+      // Start a 3-second delay before showing the "Level Complete" modal
+      const timer = setTimeout(() => {
+        setShowWinModal(true);
+        onLevelComplete(gameState.moves, gameState.timeElapsed);
+      }, 3000);
+      return () => clearTimeout(timer);
     }
   }, [gameState.status, gameState.moves, gameState.timeElapsed, onLevelComplete]);
 
@@ -81,6 +96,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
             onSelect={handleTubeClick}
             itemShape={level.itemShape}
             lastMove={gameState.lastMove}
+            lastCompletedTube={gameState.lastCompletedTube}
           />
         ))}
       </div>
@@ -107,13 +123,14 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
                 onSelect={handleTubeClick}
                 itemShape={level.itemShape}
                 lastMove={gameState.lastMove}
+                lastCompletedTube={gameState.lastCompletedTube}
               />
            </div>
         </div>
       )}
 
       {/* Win Modal */}
-      {gameState.status === 'won' && (
+      {showWinModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(5px)', padding: '20px' }}>
           <h1 style={{ color: '#00ffcc', fontSize: '4rem', marginBottom: '20px', textShadow: '0 0 20px #00ffcc', textAlign: 'center', lineHeight: '1.2' }}>Level geschafft!</h1>
           <div style={{ fontSize: '1.8rem', marginBottom: '40px', textAlign: 'center' }}>

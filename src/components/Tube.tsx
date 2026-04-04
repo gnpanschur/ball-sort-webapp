@@ -1,6 +1,7 @@
 import React from 'react';
 import { Ball } from './Ball';
 import type { TubeData } from '../types/game';
+import { Star } from 'lucide-react';
 
 interface TubeProps {
   tube: TubeData;
@@ -13,9 +14,13 @@ interface TubeProps {
     count: number;
     timestamp: number;
   };
+  lastCompletedTube?: {
+    id: number;
+    timestamp: number;
+  };
 }
 
-export const Tube: React.FC<TubeProps> = ({ tube, isSelected, onSelect, capacity, itemShape = 'ball', lastMove }) => {
+export const Tube: React.FC<TubeProps> = ({ tube, isSelected, onSelect, capacity, itemShape = 'ball', lastMove, lastCompletedTube }) => {
   // itemHeightVar handles both ring and ball heights
   const itemHeightVar = itemShape === 'ring' ? 'var(--ring-h-mult)' : 'var(--tube-h-mult)';
 
@@ -35,6 +40,10 @@ export const Tube: React.FC<TubeProps> = ({ tube, isSelected, onSelect, capacity
 
   // Determine if some balls in this tube should fall
   const isTargetTube = lastMove?.targetTubeId === tube.id;
+  
+  // Fireworks Logic
+  const showFireworks = lastCompletedTube?.id === tube.id && (Date.now() - lastCompletedTube.timestamp < 2000);
+  const fireworkColor = tube.balls.length > 0 ? `var(--color-${tube.balls[0]})` : '#fff';
 
   return (
     <div
@@ -56,6 +65,27 @@ export const Tube: React.FC<TubeProps> = ({ tube, isSelected, onSelect, capacity
         transition: 'all 0.2s ease'
       }}
     >
+      {showFireworks && Array.from({ length: 10 }).map((_, i) => {
+        const angle = (i / 10) * Math.PI * 2;
+        const dist = 100 + Math.random() * 120;
+        const x = Math.cos(angle) * dist;
+        const y = Math.sin(angle) * dist - 60;
+        return (
+          <Star 
+            key={`fw-${i}-${lastCompletedTube?.timestamp}`}
+            className="firework-particle"
+            color={fireworkColor}
+            fill={fireworkColor}
+            size={30}
+            style={{
+              boxShadow: `0 0 25px ${fireworkColor}`,
+              ['--x' as any]: `${x}px`,
+              ['--y' as any]: `${y}px`
+            }}
+          />
+        );
+      })}
+
       {/* Render actual balls (bottom to top) */}
       {tube.balls.map((b: number, i: number) => {
         const isBeingRaised = i >= tube.balls.length - raiseCount;

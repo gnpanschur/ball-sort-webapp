@@ -20,7 +20,8 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
       timeElapsed: 0,
       status: 'playing',
       history: [],
-      lastMove: undefined
+      lastMove: undefined,
+      lastCompletedTube: undefined
     });
     setSelectedTubeId(null);
   }, [level.id]); // Reload on level change
@@ -116,6 +117,10 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
              onMove();
            }
            
+           // Check if targetTube is now complete
+           const isComplete = targetTube.balls.length === targetMaxCapacity && 
+                              targetTube.balls.every(b => b === topBallColor);
+
            return {
              ...prevState,
              tubes: newTubes,
@@ -125,7 +130,8 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
                 targetTubeId: id,
                 count: ballsToMove,
                 timestamp: Date.now()
-             }
+             },
+             lastCompletedTube: isComplete ? { id, timestamp: Date.now() } : prevState.lastCompletedTube
            };
         }
         
@@ -160,7 +166,8 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
       timeElapsed: 0,
       status: 'playing',
       history: [],
-      lastMove: undefined
+      lastMove: undefined,
+      lastCompletedTube: undefined
     });
     setSelectedTubeId(null);
   };
