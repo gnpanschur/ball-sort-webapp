@@ -1542,5 +1542,194 @@
       }
     ],
     "_comment_end": "level 18 Ende"
+  },
+  {
+    "_comment_start": "level 19 Anfang",
+    "id": 19,
+    "tubeCapacity": 4,
+    "timeLimitSeconds": 0,
+    "initialTubes": [
+      {
+        "id": 1,
+        "balls": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "id": 2,
+        "balls": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "id": 3,
+        "balls": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "id": 4,
+        "balls": [
+          1,
+          4,
+          3,
+          2
+        ]
+      },
+      {
+        "id": 5,
+        "balls": []
+      },
+      {
+        "id": 6,
+        "balls": []
+      }
+    ],
+    "_comment_end": "level 19 Ende"
+  },
+  {
+    "_comment_start": "level 20 Anfang",
+    "id": 20,
+    "tubeCapacity": 5,
+    "timeLimitSeconds": 0,
+    "initialTubes": [
+      {
+        "id": 1,
+        "balls": [
+          4,
+          3,
+          1,
+          3,
+          4
+        ]
+      },
+      {
+        "id": 2,
+        "balls": [
+          2,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "id": 3,
+        "balls": [
+          4,
+          3,
+          2,
+          1,
+          2
+        ]
+      },
+      {
+        "id": 4,
+        "balls": [
+          3,
+          1,
+          4,
+          1,
+          2
+        ]
+      },
+      {
+        "id": 5,
+        "balls": []
+      },
+      {
+        "id": 6,
+        "balls": []
+      }
+    ],
+    "_comment_end": "level 20 Ende"
+  },
+  {
+    "_comment_start": "level 21 Anfang",
+    "id": 21,
+    "tubeCapacity": 6,
+    "timeLimitSeconds": 0,
+    "initialTubes": [
+      {
+        "id": 1,
+        "balls": [2, 5, 1, 4, 2, 3]
+      },
+      {
+        "id": 2,
+        "balls": [4, 3, 1, 5, 3, 3]
+      },
+      {
+        "id": 3,
+        "balls": [1, 2, 2, 5, 3, 1]
+      },
+      {
+        "id": 4,
+        "balls": [1, 2, 4, 1, 5, 4]
+      },
+      {
+        "id": 5,
+        "balls": [2, 4, 4, 5, 5, 3]
+      },
+      {
+        "id": 6,
+        "balls": []
+      },
+      {
+        "id": 7,
+        "balls": []
+      }
+    ],
+    "_comment_end": "level 21 Ende"
+  },
+  {
+    "_comment_start": "level 22 Anfang",
+    "id": 22,
+    "tubeCapacity": 6,
+    "timeLimitSeconds": 0,
+    "initialTubes": [
+      {
+        "id": 1,
+        "balls": [2, 5, 2, 4, 2, 3]
+      },
+      {
+        "id": 2,
+        "balls": [3, 5, 1, 2, 1, 2]
+      },
+      {
+        "id": 3,
+        "balls": [3, 4, 3, 5, 1, 5]
+      },
+      {
+        "id": 4,
+        "balls": [1, 3, 4, 1, 4, 1]
+      },
+      {
+        "id": 5,
+        "balls": [4, 3, 5, 4, 5, 2]
+      },
+      {
+        "id": 6,
+        "balls": []
+      },
+      {
+        "id": 7,
+        "balls": []
+      }
+    ],
+    "_comment_end": "level 22 Ende"
   }
 ]
+
+
+
+
+
