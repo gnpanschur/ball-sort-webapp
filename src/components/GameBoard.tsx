@@ -62,6 +62,17 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
         Level {level.id}
       </h2>
 
+      {level.description && (
+        <div className="level-description" style={{
+           maxWidth: '80%', textAlign: 'center', marginBottom: '15px', 
+           color: 'rgba(255, 255, 255, 0.9)', fontSize: '1.05rem',
+           background: 'rgba(0,0,0,0.3)', padding: '10px 15px', borderRadius: '8px',
+           boxShadow: 'inset 0 0 10px rgba(0,0,0,0.2)'
+        }}>
+          {level.description}
+        </div>
+      )}
+
       {/* HUD Bar */}
       <div className="game-hud">
         <div className="hud-text">

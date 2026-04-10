@@ -26,6 +26,12 @@ const getZodiacSign = (id: number): string => {
 
 export const Ball: React.FC<BallProps> = ({ colorId, shape = 'ball' }) => {
   const isRing = shape === 'ring';
+  const isCovered = colorId < 0;
+  const isLocked = colorId > 1000;
+  let actualColorId = Math.abs(colorId);
+  if (isLocked) {
+    actualColorId = actualColorId % 1000;
+  }
   
   return (
     <div 
@@ -34,7 +40,7 @@ export const Ball: React.FC<BallProps> = ({ colorId, shape = 'ball' }) => {
         width: isRing ? '90%' : 'var(--ball-s)',
         height: isRing ? 'calc(var(--ring-h-mult) - 2px)' : 'var(--ball-s)',
         borderRadius: isRing ? '4px' : '50%',
-        backgroundColor: `var(--color-${colorId})`,
+        backgroundColor: isCovered ? '#666666' : `var(--color-${actualColorId})`,
         margin: isRing ? '1px auto' : 'var(--ball-margin)',
         boxShadow: isRing ? 'inset 0 1px 3px rgba(255,255,255,0.4), inset 0 -1px 3px rgba(0,0,0,0.4)' : 'inset -8px -8px 12px rgba(0,0,0,0.4), inset 5px 5px 12px rgba(255,255,255,0.4)',
         transition: 'all 0.3s ease',
@@ -42,11 +48,12 @@ export const Ball: React.FC<BallProps> = ({ colorId, shape = 'ball' }) => {
         justifyContent: 'center',
         alignItems: 'center',
         color: 'rgba(255, 255, 255, 0.9)',
-        fontSize: isRing ? '0px' : 'var(--ball-font)',
+        fontSize: (isRing && !isLocked && !isCovered) ? '0px' : ((isCovered || isLocked) ? 'calc(var(--ball-font) * 1.3)' : 'var(--ball-font)'),
         textShadow: '1px 1px 3px rgba(0,0,0,0.8)',
+        fontWeight: (isCovered || isLocked) ? 'bold' : 'normal',
       }}
     >
-      {!isRing && getZodiacSign(colorId)}
+      {isCovered ? '?' : isLocked ? '🔒' : (!isRing ? getZodiacSign(actualColorId) : '')}
     </div>
   );
 };

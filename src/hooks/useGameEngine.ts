@@ -35,15 +35,21 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
     // Count total required balls for each color in the level
     const colorCounts: Record<number, number> = {};
     level.initialTubes.forEach(t => t.balls.forEach(b => {
-      colorCounts[b] = (colorCounts[b] || 0) + 1;
+      let realColor = Math.abs(b);
+      if (realColor > 1000) realColor %= 1000;
+      colorCounts[realColor] = (colorCounts[realColor] || 0) + 1;
     }));
 
     // Group current tubes by their contents
     const tubeContents: Record<number, { count: number; capacity: number; isPure: boolean }[]> = {};
     for (const t of gameState.tubes) {
       if (t.balls.length > 0) {
-        const firstColor = t.balls[0];
-        const isPure = t.balls.every(b => b === firstColor);
+        let firstColor = t.balls[0];
+        const isPure = t.balls.every(b => b === firstColor && b > 0 && b <= 1000);
+        
+        firstColor = Math.abs(firstColor);
+        if (firstColor > 1000) firstColor %= 1000;
+
         const capacity = (level.horizontalTubeId === t.id) 
            ? (level.horizontalTubeCapacity ?? level.tubeCapacity) 
            : level.tubeCapacity;
@@ -107,6 +113,8 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
       // Trying to pick up a ball
       const sourceTube = gameState.tubes.find(t => t.id === id);
       if (sourceTube && sourceTube.balls.length > 0) {
+        const topBall = sourceTube.balls[sourceTube.balls.length - 1];
+        if (topBall < 0 || topBall > 1000) return; // Cannot pick up a covered or locked ball directly
         setSelectedTubeId(id);
       }
     } else {
@@ -131,6 +139,10 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
         }
 
         const topBallColor = sourceTube.balls[sourceTube.balls.length - 1]; // Top ball
+        if (topBallColor > 1000) {
+           setSelectedTubeId(null);
+           return prevState; // Edge case, cannot move a locked ball
+        }
         
         // Count how many connected balls of the same color are on top
         let movableCount = 0;
@@ -164,13 +176,26 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
              onMove();
            }
            
+           // Automatically reveal the new top ball in source tube
+           if (sourceTube.balls.length > 0 && sourceTube.balls[sourceTube.balls.length - 1] < 0) {
+             sourceTube.balls[sourceTube.balls.length - 1] = Math.abs(sourceTube.balls[sourceTube.balls.length - 1]);
+           }
+           
            // Check if targetTube is now complete
            const isComplete = targetTube.balls.length === targetMaxCapacity && 
-                              targetTube.balls.every(b => b === topBallColor);
+                              targetTube.balls.every(b => b === topBallColor && b > 0 && b <= 1000);
+
+           let finalTubes = newTubes;
+           if (isComplete) {
+               finalTubes = newTubes.map(t => ({
+                   ...t,
+                   balls: t.balls.map(b => b > 1000 ? b % 1000 : b)
+               }));
+           }
 
            return {
              ...prevState,
-             tubes: newTubes,
+             tubes: finalTubes,
              moves: prevState.moves + 1,
              history: [...prevState.history, prevState.tubes],
              lastMove: {
@@ -234,6 +259,11 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
       const newTubes = prev.tubes.map(t => {
         const len = t.balls.length;
         const newBalls = allBalls.slice(pos, pos + len);
+        
+        if (newBalls.length > 0 && newBalls[newBalls.length - 1] < 0) {
+          newBalls[newBalls.length - 1] = Math.abs(newBalls[newBalls.length - 1]);
+        }
+        
         pos += len;
         return { ...t, balls: newBalls };
       });

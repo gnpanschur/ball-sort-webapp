@@ -1661,23 +1661,58 @@
     "initialTubes": [
       {
         "id": 1,
-        "balls": [2, 5, 1, 4, 2, 3]
+        "balls": [
+          2,
+          5,
+          1,
+          4,
+          2,
+          3
+        ]
       },
       {
         "id": 2,
-        "balls": [4, 3, 1, 5, 3, 3]
+        "balls": [
+          4,
+          3,
+          1,
+          5,
+          3,
+          3
+        ]
       },
       {
         "id": 3,
-        "balls": [1, 2, 2, 5, 3, 1]
+        "balls": [
+          1,
+          2,
+          2,
+          5,
+          3,
+          1
+        ]
       },
       {
         "id": 4,
-        "balls": [1, 2, 4, 1, 5, 4]
+        "balls": [
+          1,
+          2,
+          4,
+          1,
+          5,
+          4
+        ]
       },
       {
         "id": 5,
-        "balls": [2, 4, 4, 5, 5, 3]
+        "balls": [
+          2,
+          4,
+          4,
+          5,
+          5,
+          3
+        ]
       },
       {
         "id": 6,
@@ -1698,23 +1733,58 @@
     "initialTubes": [
       {
         "id": 1,
-        "balls": [2, 5, 2, 4, 2, 3]
+        "balls": [
+          2,
+          5,
+          2,
+          4,
+          2,
+          3
+        ]
       },
       {
         "id": 2,
-        "balls": [3, 5, 1, 2, 1, 2]
+        "balls": [
+          3,
+          5,
+          1,
+          2,
+          1,
+          2
+        ]
       },
       {
         "id": 3,
-        "balls": [3, 4, 3, 5, 1, 5]
+        "balls": [
+          3,
+          4,
+          3,
+          5,
+          1,
+          5
+        ]
       },
       {
         "id": 4,
-        "balls": [1, 3, 4, 1, 4, 1]
+        "balls": [
+          1,
+          3,
+          4,
+          1,
+          4,
+          1
+        ]
       },
       {
         "id": 5,
-        "balls": [4, 3, 5, 4, 5, 2]
+        "balls": [
+          4,
+          3,
+          5,
+          4,
+          5,
+          2
+        ]
       },
       {
         "id": 6,
@@ -1726,10 +1796,95 @@
       }
     ],
     "_comment_end": "level 22 Ende"
+  },
+  {
+    "id": 23,
+    "tubeCapacity": 4,
+    "timeLimitSeconds": 0,
+    "initialTubes": [
+      {
+        "id": 1,
+        "balls": [
+          -3,
+          -1,
+          2,
+          1
+        ]
+      },
+      {
+        "id": 2,
+        "balls": [
+          -2,
+          -3,
+          1,
+          2
+        ]
+      },
+      {
+        "id": 3,
+        "balls": [
+          -1,
+          -2,
+          3,
+          3
+        ]
+      },
+      {
+        "id": 4,
+        "balls": []
+      }
+    ]
+  },
+  {
+    "id": 24,
+    "tubeCapacity": 4,
+    "timeLimitSeconds": 0,
+    "description": "🔒 Einige Bälle sind gesperrt und stecken fest! Du kannst sie weder bewegen, noch etwas auf ihnen ablegen. Um alle Schlösser zu knacken, musst du mindestens EIN normales Röhrchen komplett mit einer Farbe füllen!",
+    "initialTubes": [
+      {
+        "id": 1,
+        "balls": [
+          2,
+          1004,
+          2,
+          2
+        ]
+      },
+      {
+        "id": 2,
+        "balls": [
+          2,
+          3,
+          4,
+          3
+        ]
+      },
+      {
+        "id": 3,
+        "balls": [
+          3,
+          1,
+          3,
+          1
+        ]
+      },
+      {
+        "id": 4,
+        "balls": [
+          1,
+          1,
+          4,
+          4
+        ]
+      },
+      {
+        "id": 5,
+        "balls": []
+      },
+      {
+        "id": 6,
+        "balls": []
+      }
+    ]
   }
 ]
-
-
-
-
-
