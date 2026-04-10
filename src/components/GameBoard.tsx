@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Tube } from './Tube';
 import { useGameEngine } from '../hooks/useGameEngine';
+import { useWakeLock } from '../hooks/useWakeLock';
 import type { LevelData } from '../types/game';
 import { Undo2, RotateCcw, Play, Shuffle } from 'lucide-react';
 
@@ -15,6 +16,7 @@ interface GameBoardProps {
 
 export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, onNextLevel, onMove, onTubeComplete, onWin }) => {
   const { gameState, selectedTubeId, handleTubeClick, undoMove, restartLevel, shuffleTubes, setGameState } = useGameEngine(level, onMove);
+  const { requestLock, releaseLock } = useWakeLock();
   const [showWinModal, setShowWinModal] = useState(false);
 
   // Trigger tube complete sound
@@ -32,6 +34,16 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
     }, 1000);
     return () => clearInterval(interval);
   }, [gameState.status, setGameState]);
+
+  // Handle Wake Lock
+  useEffect(() => {
+    if (gameState.status === 'playing') {
+      requestLock();
+    } else {
+      releaseLock();
+    }
+    // Cleanup on unmount or status change is handled by the effect and hook itself
+  }, [gameState.status, requestLock, releaseLock]);
 
   const winTriggeredRef = useRef(false);
 
@@ -95,15 +107,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
       </div>
 
       {/* Tubes Area */}
-      <div style={{ 
-        display: 'flex', 
-        flexWrap: 'wrap', 
-        justifyContent: 'center', 
-        gap: 'var(--tube-gap)', 
+      <div className="tubes-main-area" style={{ 
         marginTop: 'auto', 
         marginBottom: level.horizontalTubeId ? '0' : 'auto' 
       }}>
-        {gameState.tubes.filter(t => t.id !== level.horizontalTubeId).map(tube => (
+        {gameState.tubes.filter(t => {
+            const hId = level.horizontalTubeId;
+            const isHorizontal = Array.isArray(hId) ? hId.includes(t.id) : hId === t.id;
+            return !isHorizontal;
+        }).map(tube => (
           <Tube 
             key={tube.id} 
             tube={tube} 
@@ -117,31 +129,45 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
         ))}
       </div>
 
-      {/* Optional Horizontal Tube (Generic) */}
-      {level.horizontalTubeId && gameState.tubes.find(t => t.id === level.horizontalTubeId) && (
+      {/* Optional Horizontal Tubes (Generic) */}
+      {level.horizontalTubeId && (
         <div style={{
-           position: 'relative',
-           width: `calc(${level.horizontalTubeCapacity ?? level.tubeCapacity} * var(--ring-h-mult) + 40px)`,
-           height: 'var(--tube-w)',
-           margin: '60px auto auto auto', 
            display: 'flex',
-           justifyContent: 'center',
+           flexDirection: 'column',
+           gap: '40px',
+           margin: '60px auto auto auto', 
            alignItems: 'center'
         }}>
-           <div style={{
-              position: 'absolute',
-              transform: 'rotate(-90deg)'
-           }}>
-              <Tube 
-                tube={gameState.tubes.find(t => t.id === level.horizontalTubeId)!} 
-                capacity={level.horizontalTubeCapacity ?? level.tubeCapacity} 
-                isSelected={selectedTubeId === level.horizontalTubeId}
-                onSelect={handleTubeClick}
-                itemShape={level.itemShape}
-                lastMove={gameState.lastMove}
-                lastCompletedTube={gameState.lastCompletedTube}
-              />
-           </div>
+           {(Array.isArray(level.horizontalTubeId) ? level.horizontalTubeId : [level.horizontalTubeId]).map(hId => {
+              const tube = gameState.tubes.find(t => t.id === hId);
+              if (!tube) return null;
+              
+              return (
+                <div key={hId} style={{
+                   position: 'relative',
+                   width: `calc(${level.horizontalTubeCapacity ?? level.tubeCapacity} * var(--ring-h-mult) + 40px)`,
+                   height: 'var(--tube-w)',
+                   display: 'flex',
+                   justifyContent: 'center',
+                   alignItems: 'center'
+                }}>
+                   <div style={{
+                      position: 'absolute',
+                      transform: 'rotate(-90deg)'
+                   }}>
+                      <Tube 
+                        tube={tube} 
+                        capacity={level.horizontalTubeCapacity ?? level.tubeCapacity} 
+                        isSelected={selectedTubeId === hId}
+                        onSelect={handleTubeClick}
+                        itemShape={level.itemShape}
+                        lastMove={gameState.lastMove}
+                        lastCompletedTube={gameState.lastCompletedTube}
+                      />
+                   </div>
+                </div>
+              );
+           })}
         </div>
       )}
 

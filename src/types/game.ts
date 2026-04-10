@@ -11,7 +11,7 @@ export interface LevelData {
   initialTubes: TubeData[];
   timeLimitSeconds?: number;
   itemShape?: 'ball' | 'ring';
-  horizontalTubeId?: number;
+  horizontalTubeId?: number | number[]; // Support single ID or array of IDs for special layout
   horizontalTubeCapacity?: number;
   moveSingleBallOnly?: boolean;
   winHeight?: number;

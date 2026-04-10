@@ -91,24 +91,24 @@
 
 /* Responsive Sizing (Mobile scaling for 5 tubes per row) */
 :root {
-  --tube-w: 64px;
-  --ball-s: 40px;
-  --ball-font: 16px;
+  --tube-w: 77px;
+  --ball-s: 48px;
+  --ball-font: 19px;
   --ball-margin: 2px auto;
-  --tube-h-mult: 44px;
-  --ring-h-mult: 18px;
-  --tube-gap: 20px;
+  --tube-h-mult: 53px;
+  --ring-h-mult: 22px;
+  --tube-gap: 24px;
 }
 
 @media (max-width: 600px) {
   :root {
-    --tube-w: 11.5vw;
-    --ball-s: 9.5vw;
-    --ball-font: 4vw;
-    --ball-margin: 1vw auto;
-    --tube-h-mult: 11.5vw;
-    --ring-h-mult: 4.5vw;
-    --tube-gap: 1.5vw;
+    --tube-w: 13.8vw;
+    --ball-s: 11.4vw;
+    --ball-font: 4.8vw;
+    --ball-margin: 1.2vw auto;
+    --tube-h-mult: 13.8vw;
+    --ring-h-mult: 5.4vw;
+    --tube-gap: 1.8vw;
   }
 }
 

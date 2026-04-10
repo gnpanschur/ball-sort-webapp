@@ -147,7 +147,7 @@ function App() {
     <div className="app-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw' }}>
       <header className="app-header">
         <h1 className="header-title">Ball Sort</h1>
-        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
           <select 
             value={currentLevelId} 
             onChange={(e) => { 

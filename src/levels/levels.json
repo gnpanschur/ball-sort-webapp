@@ -951,6 +951,8 @@
     "tubeCapacity": 20,
     "itemShape": "ring",
     "timeLimitSeconds": 0,
+    "horizontalTubeId": 7,
+    "horizontalTubeCapacity": 20,
     "initialTubes": [
       {
         "id": 1,
@@ -1113,7 +1115,7 @@
     "tubeCapacity": 23,
     "itemShape": "ring",
     "timeLimitSeconds": 0,
-    "horizontalTubeId": 8,
+    "horizontalTubeId": [7, 8],
     "horizontalTubeCapacity": 18,
     "initialTubes": [
       {

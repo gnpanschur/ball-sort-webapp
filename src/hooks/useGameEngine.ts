@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { LevelData, TubeData, GameState } from '../types/game';
 
 export function useGameEngine(level: LevelData, onMove?: () => void) {
@@ -9,6 +9,15 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
     status: 'playing',
     history: []
   });
+
+  const horizontalIds = useMemo(() => {
+    if (!level.horizontalTubeId) return [];
+    return Array.isArray(level.horizontalTubeId) ? level.horizontalTubeId : [level.horizontalTubeId];
+  }, [level.horizontalTubeId]);
+
+  const isHorizontalTube = useCallback((id: number) => {
+    return horizontalIds.includes(id);
+  }, [horizontalIds]);
 
   const [selectedTubeId, setSelectedTubeId] = useState<number | null>(null);
 
@@ -50,7 +59,7 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
         firstColor = Math.abs(firstColor);
         if (firstColor > 1000) firstColor %= 1000;
 
-        const capacity = (level.horizontalTubeId === t.id) 
+        const capacity = isHorizontalTube(t.id) 
            ? (level.horizontalTubeCapacity ?? level.tubeCapacity) 
            : level.tubeCapacity;
 
@@ -155,7 +164,7 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
             }
         }
 
-        const targetMaxCapacity = (level.horizontalTubeId === targetTube.id) 
+        const targetMaxCapacity = isHorizontalTube(targetTube.id) 
             ? (level.horizontalTubeCapacity ?? level.tubeCapacity) 
             : level.tubeCapacity;
         const availableSpace = targetMaxCapacity - targetTube.balls.length;
