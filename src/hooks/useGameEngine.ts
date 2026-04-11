@@ -139,12 +139,17 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
         const sourceIndex = newTubes.findIndex(t => t.id === selectedTubeId);
         const targetIndex = newTubes.findIndex(t => t.id === id);
         
+        // Safety checks to prevent crash if tubes are not found
+        if (sourceIndex === -1 || targetIndex === -1) {
+           console.warn(`Tube lookup failed: sourceIndex=${sourceIndex}, targetIndex=${targetIndex}`);
+           return prevState;
+        }
+
         const sourceTube = newTubes[sourceIndex];
         const targetTube = newTubes[targetIndex];
 
-        if (sourceTube.balls.length === 0) {
-           setSelectedTubeId(null);
-           return prevState; // Edge case
+        if (!sourceTube || !targetTube || sourceTube.balls.length === 0) {
+           return prevState; // Edge case or invalid move state
         }
 
         const topBallColor = sourceTube.balls[sourceTube.balls.length - 1]; // Top ball

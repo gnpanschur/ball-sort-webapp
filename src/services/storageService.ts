@@ -8,7 +8,20 @@ export const storageService = {
     const data = localStorage.getItem(PROFILE_KEY);
     if (data) {
       try {
-         const profile = JSON.parse(data) as UserProfile;
+         const parsed = JSON.parse(data) as Partial<UserProfile>;
+         
+         const profile: UserProfile = {
+           highestLevel: parsed.highestLevel ?? 1,
+           completedLevels: parsed.completedLevels ?? [],
+           bestTimes: parsed.bestTimes ?? {},
+           bestMoves: parsed.bestMoves ?? {},
+           theme: parsed.theme ?? 'ball',
+           gameMode: parsed.gameMode ?? 'relaxed',
+           audioEnabled: parsed.audioEnabled ?? true,
+           audioVolume: parsed.audioVolume ?? 0.5,
+           totalTimePerLevel: parsed.totalTimePerLevel ?? {},
+         };
+
          // TEMPORARY: Unlocking Level 11 for testing
          if (profile.highestLevel < 11) {
            profile.highestLevel = 11;
