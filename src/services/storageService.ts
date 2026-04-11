@@ -28,6 +28,7 @@ export const storageService = {
       gameMode: 'relaxed',
       audioEnabled: true,
       audioVolume: 0.5,
+      totalTimePerLevel: {},
     };
   },
 

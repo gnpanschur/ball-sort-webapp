@@ -12,10 +12,12 @@ interface GameBoardProps {
   onMove?: () => void;
   onTubeComplete?: () => void;
   onWin?: () => void;
+  onTimeUpdate?: (seconds: number) => void;
 }
 
-export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, onNextLevel, onMove, onTubeComplete, onWin }) => {
+export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, onNextLevel, onMove, onTubeComplete, onWin, onTimeUpdate }) => {
   const { gameState, selectedTubeId, handleTubeClick, undoMove, restartLevel, shuffleTubes, setGameState } = useGameEngine(level, onMove);
+  const lastInteractionRef = useRef(Date.now());
   const { requestLock, releaseLock } = useWakeLock();
   const [showWinModal, setShowWinModal] = useState(false);
 
@@ -30,10 +32,16 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
   useEffect(() => {
     if (gameState.status !== 'playing') return;
     const interval = setInterval(() => {
-      setGameState(s => ({ ...s, timeElapsed: s.timeElapsed + 1 }));
+      const now = Date.now();
+      const inactiveTime = now - lastInteractionRef.current;
+      
+      if (inactiveTime < 180000) { // 3 minutes pause
+        setGameState(s => ({ ...s, timeElapsed: s.timeElapsed + 1 }));
+        if (onTimeUpdate) onTimeUpdate(1);
+      }
     }, 1000);
     return () => clearInterval(interval);
-  }, [gameState.status, setGameState]);
+  }, [gameState.status, setGameState, onTimeUpdate]);
 
   // Handle Wake Lock
   useEffect(() => {
@@ -121,7 +129,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
             tube={tube} 
             capacity={level.tubeCapacity} 
             isSelected={selectedTubeId === tube.id}
-            onSelect={handleTubeClick}
+            onSelect={(id) => {
+              lastInteractionRef.current = Date.now();
+              handleTubeClick(id);
+            }}
             itemShape={level.itemShape}
             lastMove={gameState.lastMove}
             lastCompletedTube={gameState.lastCompletedTube}
@@ -159,7 +170,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
                         tube={tube} 
                         capacity={level.horizontalTubeCapacity ?? level.tubeCapacity} 
                         isSelected={selectedTubeId === hId}
-                        onSelect={handleTubeClick}
+                        onSelect={(id) => {
+                          lastInteractionRef.current = Date.now();
+                          handleTubeClick(id);
+                        }}
                         itemShape={level.itemShape}
                         lastMove={gameState.lastMove}
                         lastCompletedTube={gameState.lastCompletedTube}

@@ -47,6 +47,7 @@ export interface UserProfile {
   gameMode: GameMode;
   audioEnabled: boolean;
   audioVolume: number;
+  totalTimePerLevel: Record<number, number>; // levelId -> total accumulated seconds spent
 }
 
 export interface LeaderboardEntry {

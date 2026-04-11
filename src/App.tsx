@@ -18,9 +18,9 @@ const toggleFullscreen = () => {
 function App() {
   const [profile, setProfile] = useState<UserProfile>(storageService.getProfile());
   const [currentLevelId, setCurrentLevelId] = useState<number>(profile.highestLevel);
-  const [currentView, setCurrentView] = useState<'menu' | 'game' | 'leaderboard' | 'settings'>('menu');
+  const [currentView, setCurrentView] = useState<'menu' | 'game' | 'leaderboard' | 'settings' | 'completion'>('menu');
 
-  const { playClick, playWin, playPour, playTubeComplete } = useAudio(profile);
+  const { playClick, playWin, playPour, playTubeComplete, playCongratulations } = useAudio(profile);
 
   // Sync profile to storage and DOM
   useEffect(() => {
@@ -35,20 +35,27 @@ function App() {
     // Submit score
     storageService.submitScore('Spieler1', currentLevelId, time, moves); 
 
-    setProfile(p => {
-      const isNewBestTime = !p.bestTimes[currentLevelId] || p.bestTimes[currentLevelId] > time;
-      const isNewBestMoves = !p.bestMoves[currentLevelId] || p.bestMoves[currentLevelId] > moves;
-      
-      const newHighest = Math.max(p.highestLevel, currentLevelId + 1 > levelsData.length ? levelsData.length : currentLevelId + 1);
-      
-      return {
-        ...p,
-        highestLevel: newHighest,
-        completedLevels: Array.from(new Set([...p.completedLevels, currentLevelId])),
-        bestTimes: isNewBestTime ? { ...p.bestTimes, [currentLevelId]: time } : p.bestTimes,
-        bestMoves: isNewBestMoves ? { ...p.bestMoves, [currentLevelId]: moves } : p.bestMoves
-      };
-    });
+    setProfile(p => ({
+      ...p,
+      highestLevel: Math.max(p.highestLevel, currentLevelId + 1 > levelsData.length ? levelsData.length : currentLevelId + 1),
+      completedLevels: Array.from(new Set([...p.completedLevels, currentLevelId])),
+      bestTimes: (!p.bestTimes[currentLevelId] || p.bestTimes[currentLevelId] > time) 
+        ? { ...p.bestTimes, [currentLevelId]: time } 
+        : p.bestTimes,
+      bestMoves: (!p.bestMoves[currentLevelId] || p.bestMoves[currentLevelId] > moves)
+        ? { ...p.bestMoves, [currentLevelId]: moves }
+        : p.bestMoves
+    }));
+  };
+
+  const handleTimeUpdate = (seconds: number) => {
+    setProfile(p => ({
+      ...p,
+      totalTimePerLevel: {
+        ...p.totalTimePerLevel,
+        [currentLevelId]: (p.totalTimePerLevel[currentLevelId] || 0) + seconds
+      }
+    }));
   };
 
   const handleNextLevel = () => {
@@ -56,7 +63,7 @@ function App() {
     if (currentLevelId < levelsData.length) {
       setCurrentLevelId(currentLevelId + 1);
     } else {
-      setCurrentView('menu'); // Game Finished basically
+      setCurrentView('completion');
     }
   };
 
@@ -142,6 +149,90 @@ function App() {
       </div>
     </div>
   );
+
+  const CompletionView = () => {
+    const totalSeconds = Object.values(profile.totalTimePerLevel).reduce((sum, sec) => sum + sec, 0);
+
+    const days = Math.floor(totalSeconds / (3600 * 24));
+    const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    useEffect(() => {
+      playCongratulations();
+    }, []);
+
+    return (
+      <div className="animate-scale-in" style={{ 
+        padding: '40px', 
+        maxWidth: '800px', 
+        margin: '0 auto', 
+        background: 'rgba(255, 255, 255, 0.1)', 
+        backdropFilter: 'blur(20px)',
+        borderRadius: '32px', 
+        border: '1px solid rgba(255, 215, 0, 0.3)',
+        textAlign: 'center',
+        boxShadow: '0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(255, 215, 0, 0.2)'
+      }}>
+        <div className="animate-float" style={{ marginBottom: '30px' }}>
+          <Trophy size={120} color="#ffd700" style={{ filter: 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.5))' }} />
+        </div>
+        
+        <h1 className="animate-shine" style={{ fontSize: '4rem', marginBottom: '20px', fontWeight: 'bold' }}>
+          Gratulation!!
+        </h1>
+        
+        <p style={{ fontSize: '1.8rem', marginBottom: '40px', color: 'rgba(255, 255, 255, 0.9)' }}>
+          Du hast alle Levels geschafft in:
+        </p>
+
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
+          gap: '20px', 
+          marginBottom: '50px' 
+        }}>
+          {[
+            { label: 'Tage', value: days },
+            { label: 'Std.', value: hours },
+            { label: 'Min.', value: minutes },
+            { label: 'Sek.', value: seconds }
+          ].map((item, i) => (
+            <div key={i} className="animate-fade-in-scale" style={{ 
+              background: 'rgba(0, 0, 0, 0.3)', 
+              padding: '20px', 
+              borderRadius: '20px', 
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              animationDelay: `${0.2 + i * 0.1}s`
+            }}>
+              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#ffd700' }}>{item.value}</div>
+              <div style={{ fontSize: '1.2rem', opacity: 0.7 }}>{item.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <button 
+          onClick={() => { playClick(); setCurrentView('menu'); }} 
+          style={{ 
+            padding: '15px 40px', 
+            fontSize: '1.5rem', 
+            background: 'linear-gradient(135deg, #ffd700, #ff8c00)', 
+            border: 'none', 
+            borderRadius: '16px', 
+            color: 'black', 
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            boxShadow: '0 10px 20px rgba(255, 140, 0, 0.3)'
+          }}
+          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          Zurück zum Menü
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="app-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw' }}>
@@ -247,11 +338,13 @@ function App() {
              onMove={playPour}
              onTubeComplete={playTubeComplete}
              onWin={playWin}
+             onTimeUpdate={handleTimeUpdate}
           />
         )}
 
         {currentView === 'leaderboard' && <LeaderboardView />}
         {currentView === 'settings' && <SettingsView />}
+        {currentView === 'completion' && <CompletionView />}
       </main>
     </div>
   );
