@@ -3,7 +3,7 @@ import { Tube } from './Tube';
 import { useGameEngine } from '../hooks/useGameEngine';
 import { useWakeLock } from '../hooks/useWakeLock';
 import type { LevelData } from '../types/game';
-import { Undo2, RotateCcw, Play, Shuffle } from 'lucide-react';
+import { Undo2, RotateCcw, Play } from 'lucide-react';
 
 interface GameBoardProps {
   level: LevelData;
@@ -16,7 +16,7 @@ interface GameBoardProps {
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, onNextLevel, onMove, onTubeComplete, onWin, onTimeUpdate }) => {
-  const { gameState, selectedTubeId, handleTubeClick, undoMove, restartLevel, shuffleTubes, setGameState } = useGameEngine(level, onMove);
+  const { gameState, selectedTubeId, handleTubeClick, undoMove, restartLevel, setGameState } = useGameEngine(level, onMove);
   const lastInteractionRef = useRef(Date.now());
   const { requestLock, releaseLock } = useWakeLock();
   const [showWinModal, setShowWinModal] = useState(false);

@@ -24,6 +24,7 @@ export interface GameState {
   timeElapsed: number;
   status: 'playing' | 'won';
   history: TubeData[][];
+  undoUsed?: boolean;
   lastMove?: {
     targetTubeId: number;
     count: number;
@@ -49,6 +50,7 @@ export interface UserProfile {
   audioVolume: number;
   totalTimePerLevel: Record<number, number>; // levelId -> total accumulated seconds spent
   background?: string;
+  playerName?: string;
 }
 
 export interface LeaderboardEntry {
