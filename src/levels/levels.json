@@ -953,6 +953,7 @@
     "timeLimitSeconds": 0,
     "horizontalTubeId": 7,
     "horizontalTubeCapacity": 20,
+    "description": "Unter den sechs vollen Behältern befindet sich ein leerer.",
     "initialTubes": [
       {
         "id": 1,
