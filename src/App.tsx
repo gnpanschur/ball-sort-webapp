@@ -417,48 +417,48 @@ function App() {
       backgroundRepeat: 'no-repeat',
       backgroundColor: 'var(--bg-color)'
     }}>
-      <header className="app-header">
+      <header className="app-header" style={{ position: 'relative' }}>
+        <div style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '40px' }}>
+          <div style={{ 
+            position: 'absolute', 
+            top: '50%', 
+            left: '50%', 
+            transform: 'translate(-50%, -50%)', 
+            width: '3px', 
+            height: '3px', 
+            backgroundColor: 'white', 
+            borderRadius: '50%', 
+            opacity: 0.3,
+            pointerEvents: 'none' 
+          }} />
+          <select 
+            value={currentLevelId} 
+            onChange={(e) => { 
+              const id = parseInt(e.target.value);
+              setCurrentLevelId(id);
+              setCurrentView('game');
+              playClick();
+            }}
+            style={{ 
+              opacity: 0,
+              width: '100%',
+              height: '100%',
+              cursor: 'pointer',
+              border: 'none',
+              background: 'transparent',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              zIndex: 10
+            }}
+          >
+            {levelsData.map(l => (
+              <option key={l.id} value={l.id}>Level {l.id}</option>
+            ))}
+          </select>
+        </div>
         <h1 className="header-title">Ball Sort</h1>
         <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <div style={{ position: 'relative', width: '20px', height: '40px' }}>
-            <div style={{ 
-              position: 'absolute', 
-              top: '50%', 
-              left: '50%', 
-              transform: 'translate(-50%, -50%)', 
-              width: '3px', 
-              height: '3px', 
-              backgroundColor: 'white', 
-              borderRadius: '50%', 
-              opacity: 0.3,
-              pointerEvents: 'none' 
-            }} />
-            <select 
-              value={currentLevelId} 
-              onChange={(e) => { 
-                const id = parseInt(e.target.value);
-                setCurrentLevelId(id);
-                setCurrentView('game');
-                playClick();
-              }}
-              style={{ 
-                opacity: 0,
-                width: '100%',
-                height: '100%',
-                cursor: 'pointer',
-                border: 'none',
-                background: 'transparent',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                zIndex: 10
-              }}
-            >
-              {levelsData.map(l => (
-                <option key={l.id} value={l.id}>Level {l.id}</option>
-              ))}
-            </select>
-          </div>
           <button 
             onClick={toggleFullscreen} 
             title="Vollbild" 
