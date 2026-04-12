@@ -78,10 +78,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
   return (
     <div className="gameboard-layout" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', height: '100%', padding: '20px 0' }}>
       
-      <h2 className="hud-level-title">
-        Level {level.id}
-      </h2>
-
       {level.description && (
         <div className="level-description" style={{
            maxWidth: '80%', textAlign: 'center', marginBottom: '15px', 
@@ -95,6 +91,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
 
       {/* HUD Bar */}
       <div className="game-hud">
+        <h2 className="hud-level-title" style={{ margin: 0, fontSize: '1.5rem' }}>
+          Level {level.id}
+        </h2>
         <div className="hud-text">
           Zeit: {gameState.timeElapsed}s {level.timeLimitSeconds && `/ ${level.timeLimitSeconds}s`}
         </div>
@@ -102,14 +101,11 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
           Züge: {gameState.moves}
         </div>
         <div className="hud-icons">
-          <button className="hud-icon-btn" onClick={undoMove} disabled={gameState.history.length === 0} title="Rückgängig" style={{ color: gameState.history.length === 0 ? 'gray' : 'white' }}>
+          <button className="hud-icon-btn" onClick={undoMove} disabled={gameState.history.length === 0 || gameState.undoUsed} title={gameState.undoUsed ? "Nur 1 Undo pro Level-Versuch erlaubt" : "Rückgängig"} style={{ color: (gameState.history.length === 0 || gameState.undoUsed) ? 'gray' : 'white' }}>
             <Undo2 />
           </button>
           <button className="hud-icon-btn" onClick={restartLevel} title="Neustart">
             <RotateCcw />
-          </button>
-          <button className="hud-icon-btn" onClick={shuffleTubes} title="Röhrchen neu mischen">
-            <Shuffle />
           </button>
         </div>
       </div>
@@ -136,6 +132,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
             itemShape={level.itemShape}
             lastMove={gameState.lastMove}
             lastCompletedTube={gameState.lastCompletedTube}
+            isSquare={level.id === 14 || level.id === 15}
           />
         ))}
       </div>
@@ -145,18 +142,19 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
         <div style={{
            display: 'flex',
            flexDirection: 'column',
-           gap: '40px',
-           margin: '60px auto auto auto', 
+           gap: (level.id === 14 || level.id === 15) ? '15px' : '40px',
+           margin: (level.id === 14 || level.id === 15) ? '15px auto auto auto' : '60px auto auto auto', 
            alignItems: 'center'
         }}>
            {(Array.isArray(level.horizontalTubeId) ? level.horizontalTubeId : [level.horizontalTubeId]).map(hId => {
               const tube = gameState.tubes.find(t => t.id === hId);
               if (!tube) return null;
+              const itemHeightVar = level.itemShape === 'ring' ? 'var(--ring-h-mult)' : 'var(--tube-h-mult)';
               
               return (
                 <div key={hId} style={{
                    position: 'relative',
-                   width: `calc(${level.horizontalTubeCapacity ?? level.tubeCapacity} * var(--ring-h-mult) + 40px)`,
+                   width: (level.id === 14 || level.id === 15) ? '100%' : `calc(${level.horizontalTubeCapacity ?? level.tubeCapacity} * ${itemHeightVar} + 40px)`,
                    height: 'var(--tube-w)',
                    display: 'flex',
                    justifyContent: 'center',
@@ -164,7 +162,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
                 }}>
                    <div style={{
                       position: 'absolute',
-                      transform: 'rotate(-90deg)'
+                      top: '50%',
+                      left: '50%',
+                      transform: (level.id === 14 || level.id === 15) ? 'translate(-50%, -50%) rotate(-90deg) scale(0.9)' : 'translate(-50%, -50%) rotate(-90deg)'
                    }}>
                       <Tube 
                         tube={tube} 
@@ -177,6 +177,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
                         itemShape={level.itemShape}
                         lastMove={gameState.lastMove}
                         lastCompletedTube={gameState.lastCompletedTube}
+                        isSquare={level.id === 14 || level.id === 15}
                       />
                    </div>
                 </div>

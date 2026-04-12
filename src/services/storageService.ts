@@ -20,6 +20,7 @@ export const storageService = {
            audioEnabled: parsed.audioEnabled ?? true,
            audioVolume: parsed.audioVolume ?? 0.5,
            totalTimePerLevel: parsed.totalTimePerLevel ?? {},
+           background: parsed.background ?? 'default',
          };
 
          // TEMPORARY: Unlocking Level 11 for testing
@@ -42,6 +43,7 @@ export const storageService = {
       audioEnabled: true,
       audioVolume: 0.5,
       totalTimePerLevel: {},
+      background: 'default',
     };
   },
 

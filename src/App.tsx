@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import levelsData from './levels/levels.json';
 import type { LevelData, UserProfile, ThemeType, GameMode } from './types/game';
 import { storageService } from './services/storageService';
@@ -69,32 +69,80 @@ function App() {
 
   const LeaderboardView = () => {
     const records = storageService.getLeaderboard().filter(r => r.levelId === currentLevelId);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [sliderValue, setSliderValue] = useState(0);
+    const totalLevels = levelsData.length;
+
+    // Sync range slider -> scroll
+    const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const val = parseInt(e.target.value);
+      setSliderValue(val);
+      if (scrollRef.current) {
+        const max = scrollRef.current.scrollWidth - scrollRef.current.clientWidth;
+        scrollRef.current.scrollLeft = (val / 100) * max;
+      }
+    };
+
+    // Sync scroll -> range slider
+    const handleScroll = () => {
+      if (scrollRef.current) {
+        const max = scrollRef.current.scrollWidth - scrollRef.current.clientWidth;
+        if (max > 0) setSliderValue(Math.round((scrollRef.current.scrollLeft / max) * 100));
+      }
+    };
+
     return (
-      <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', background: 'var(--panel-bg)', borderRadius: '16px' }}>
-        <h2>Rangliste (Level {currentLevelId})</h2>
-        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '20px' }}>
-          {Array.from({length: levelsData.length}).map((_, i) => (
-             <button key={i} onClick={() => { playClick(); setCurrentLevelId(i+1); }} style={{ padding: '5px 15px', background: currentLevelId === i + 1 ? 'var(--btn-bg-hover)' : 'var(--btn-bg)', borderRadius: '8px' }}>
+      <div style={{ padding: '20px', width: '100%', maxWidth: '600px', margin: '0 auto', background: 'var(--panel-bg)', borderRadius: '16px' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '15px' }}>Rangliste (Level {currentLevelId})</h2>
+
+        {/* Level buttons with hidden overflow, controlled by slider */}
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', marginBottom: '8px', scrollbarWidth: 'none' }}
+        >
+          {Array.from({length: totalLevels}).map((_, i) => (
+             <button key={i} onClick={() => { playClick(); setCurrentLevelId(i+1); }} style={{ padding: '8px 16px', flexShrink: 0, background: currentLevelId === i + 1 ? 'var(--btn-bg-hover)' : 'var(--btn-bg)', borderRadius: '8px', fontWeight: 'bold' }}>
                L{i+1}
              </button>
           ))}
         </div>
+
+        {/* Green range slider */}
+        <input
+          type="range"
+          min="0" max="100"
+          value={sliderValue}
+          onChange={handleSlider}
+          className="big-slider"
+        />
+
         {records.length > 0 ? (
-          <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid gray' }}>
-                 <th>Spieler</th><th>Zeit</th><th>Züge</th><th>Datum</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.slice(0, 20).map((r, i) => (
-                <tr key={i}>
-                  <td>{r.playerName}</td><td>{r.time}s</td><td>{r.moves}</td><td>{new Date(r.date).toLocaleDateString()}</td>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', minWidth: '350px' }}>
+              <thead>
+                <tr style={{ borderBottom: '2px solid rgba(255,255,255,0.3)' }}>
+                   <th style={{ padding: '10px 5px' }}>Spieler</th><th style={{ padding: '10px 5px' }}>Zeit</th><th style={{ padding: '10px 5px' }}>Züge</th><th style={{ padding: '10px 5px' }}>Datum</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : <p>Noch keine Einträge für dieses Level.</p>}
+              </thead>
+              <tbody>
+                {records.slice(0, 20).map((r, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <td style={{ padding: '10px 5px' }}>{r.playerName}</td><td style={{ padding: '10px 5px' }}>{r.time}s</td><td style={{ padding: '10px 5px' }}>{r.moves}</td><td style={{ padding: '10px 5px' }}>{new Date(r.date).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <p style={{ textAlign: 'center', margin: '20px 0' }}>Noch keine Einträge für dieses Level.</p>}
+        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+          <button 
+            onClick={() => { playClick(); setCurrentView('menu'); }}
+            style={{ padding: '10px 20px', fontSize: '1.2rem', background: 'var(--btn-bg)', borderRadius: '12px' }}
+          >
+            Rangliste schließen
+          </button>
+        </div>
       </div>
     );
   };
@@ -131,6 +179,21 @@ function App() {
       </div>
 
       <div style={{ margin: '20px 0' }}>
+        <h3>Hintergrund</h3>
+        <select 
+           value={profile.background || 'default'} 
+           onChange={e => { playClick(); setProfile({...profile, background: e.target.value}); }}
+           style={{ padding: '10px', borderRadius: '8px', background: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--tube-border)', width: '100%', maxWidth: '300px' }}
+        >
+          <option value="default">Standard (Design-Farbe)</option>
+          <option value="Grün01.webp">Grün 1</option>
+          <option value="Grün02.webp">Grün 2</option>
+          <option value="Rot.webp">Rot</option>
+          <option value="Violett.webp">Violett</option>
+        </select>
+      </div>
+
+      <div style={{ margin: '20px 0' }}>
         <h3>Audio</h3>
         <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <input 
@@ -146,6 +209,15 @@ function App() {
            onChange={e => setProfile({...profile, audioVolume: parseFloat(e.target.value)})}
            style={{ display: 'block', marginTop: '10px' }}
         />
+      </div>
+
+      <div style={{ marginTop: '30px', textAlign: 'center' }}>
+        <button 
+          onClick={() => { playClick(); setCurrentView('menu'); }}
+          style={{ padding: '10px 20px', fontSize: '1.2rem', background: 'var(--btn-bg)', borderRadius: '12px' }}
+        >
+          Einstellungen schließen
+        </button>
       </div>
     </div>
   );
@@ -235,7 +307,17 @@ function App() {
   };
 
   return (
-    <div className="app-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw' }}>
+    <div className="app-container" style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '100vh', 
+      width: '100vw',
+      backgroundImage: profile.background && profile.background !== 'default' ? `url('/Bilder/${profile.background}')` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundColor: 'var(--bg-color)'
+    }}>
       <header className="app-header">
         <h1 className="header-title">Ball Sort</h1>
         <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>

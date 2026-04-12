@@ -7,7 +7,8 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
     moves: 0,
     timeElapsed: 0,
     status: 'playing',
-    history: []
+    history: [],
+    undoUsed: false
   });
 
   const horizontalIds = useMemo(() => {
@@ -29,6 +30,7 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
       timeElapsed: 0,
       status: 'playing',
       history: [],
+      undoUsed: false,
       lastMove: undefined,
       lastCompletedTube: undefined
     });
@@ -230,7 +232,7 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
   }, [selectedTubeId, gameState, level.tubeCapacity]);
 
   const undoMove = () => {
-     if (gameState.status !== 'playing' || gameState.history.length === 0) return;
+     if (gameState.status !== 'playing' || gameState.history.length === 0 || gameState.undoUsed) return;
      
      setGameState(prev => {
         const newHistory = [...prev.history];
@@ -239,7 +241,8 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
            ...prev,
            tubes: previousTubes,
            moves: Math.max(0, prev.moves - 1),
-           history: newHistory
+           history: newHistory,
+           undoUsed: true
         };
      });
      setSelectedTubeId(null);
@@ -252,6 +255,7 @@ export function useGameEngine(level: LevelData, onMove?: () => void) {
       timeElapsed: 0,
       status: 'playing',
       history: [],
+      undoUsed: false,
       lastMove: undefined,
       lastCompletedTube: undefined
     });

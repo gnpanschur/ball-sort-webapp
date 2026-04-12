@@ -18,9 +18,10 @@ interface TubeProps {
     id: number;
     timestamp: number;
   };
+  isSquare?: boolean;
 }
 
-export const Tube: React.FC<TubeProps> = ({ tube, isSelected, onSelect, capacity, itemShape = 'ball', lastMove, lastCompletedTube }) => {
+export const Tube: React.FC<TubeProps> = ({ tube, isSelected, onSelect, capacity, itemShape = 'ball', lastMove, lastCompletedTube, isSquare = false }) => {
   // itemHeightVar handles both ring and ball heights
   const itemHeightVar = itemShape === 'ring' ? 'var(--ring-h-mult)' : 'var(--tube-h-mult)';
 
@@ -53,7 +54,7 @@ export const Tube: React.FC<TubeProps> = ({ tube, isSelected, onSelect, capacity
         height: `calc(${capacity} * ${itemHeightVar} + 20px)`,
         border: '4px solid var(--tube-border)',
         borderTop: 'none',
-        borderRadius: '0 0 32px 32px',
+        borderRadius: isSquare ? '0' : '0 0 32px 32px',
         backgroundColor: 'var(--tube-color)',
         display: 'flex',
         flexDirection: 'column-reverse', // Fill from bottom up

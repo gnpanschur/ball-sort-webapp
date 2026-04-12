@@ -48,6 +48,7 @@ export interface UserProfile {
   audioEnabled: boolean;
   audioVolume: number;
   totalTimePerLevel: Record<number, number>; // levelId -> total accumulated seconds spent
+  background?: string;
 }
 
 export interface LeaderboardEntry {
