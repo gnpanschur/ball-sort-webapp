@@ -4,7 +4,7 @@ import type { LevelData, UserProfile, ThemeType, GameMode } from './types/game';
 import { storageService } from './services/storageService';
 import { useAudio } from './hooks/useAudio';
 import { GameBoard } from './components/GameBoard';
-import { Settings, Trophy, PlayCircle, X, Maximize } from 'lucide-react';
+import { Settings, Trophy, PlayCircle, X, Maximize, User } from 'lucide-react';
 
 const toggleFullscreen = () => {
   if (!document.fullscreenElement) {
@@ -19,6 +19,8 @@ function App() {
   const [profile, setProfile] = useState<UserProfile>(storageService.getProfile());
   const [currentLevelId, setCurrentLevelId] = useState<number>(profile.highestLevel);
   const [currentView, setCurrentView] = useState<'menu' | 'game' | 'leaderboard' | 'settings' | 'completion'>('menu');
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  const [nameInput, setNameInput] = useState('');
 
   const { playClick, playWin, playPour, playTubeComplete, playCongratulations } = useAudio(profile);
 
@@ -33,7 +35,7 @@ function App() {
   const handleLevelComplete = (moves: number, time: number) => {
     // Score submission only now (sound triggered early in onWin)    
     // Submit score
-    storageService.submitScore('Spieler1', currentLevelId, time, moves); 
+    storageService.submitScore(profile.playerName || 'Spieler1', currentLevelId, time, moves); 
 
     setProfile(p => ({
       ...p,
@@ -66,6 +68,103 @@ function App() {
       setCurrentView('completion');
     }
   };
+
+  // Open name dialog to collect name; optionally navigate to game after saving
+  const openNameDialog = (thenStartGame?: boolean) => {
+    setNameInput(profile.playerName || '');
+    setShowNameDialog(true);
+    if (thenStartGame) {
+      // store intent: after save go to game
+      setPendingGoToGame(true);
+    }
+  };
+  const [pendingGoToGame, setPendingGoToGame] = useState(false);
+
+  const saveName = () => {
+    const trimmed = nameInput.trim();
+    if (!trimmed) return;
+    setProfile(p => ({ ...p, playerName: trimmed }));
+    setShowNameDialog(false);
+    if (pendingGoToGame) {
+      setPendingGoToGame(false);
+      setCurrentLevelId(profile.highestLevel);
+      setCurrentView('game');
+    }
+  };
+
+  const handleStartGame = () => {
+    playClick();
+    if (!profile.playerName) {
+      openNameDialog(true);
+    } else {
+      setCurrentLevelId(profile.highestLevel);
+      setCurrentView('game');
+    }
+  };
+
+  // Name Dialog Modal
+  const NameDialog = () => (
+    <div style={{
+      position: 'fixed', inset: 0,
+      background: 'rgba(0,0,0,0.75)',
+      backdropFilter: 'blur(6px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 999
+    }}>
+      <div style={{
+        background: 'var(--panel-bg)',
+        border: '1px solid var(--tube-border)',
+        borderRadius: '20px',
+        padding: '36px 32px',
+        maxWidth: '380px',
+        width: '90%',
+        textAlign: 'center',
+        boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+      }}>
+        <User size={48} style={{ marginBottom: '16px', color: 'var(--btn-bg)' }} />
+        <h2 style={{ marginBottom: '10px', fontSize: '1.6rem' }}>Wie heißt du?</h2>
+        <p style={{ opacity: 0.7, marginBottom: '24px', fontSize: '0.95rem' }}>Dein Name erscheint in der Rangliste.</p>
+        <input
+          type="text"
+          value={nameInput}
+          onChange={e => setNameInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && saveName()}
+          placeholder="Dein Name..."
+          autoFocus
+          maxLength={20}
+          style={{
+            width: '100%',
+            padding: '12px 16px',
+            fontSize: '1.2rem',
+            borderRadius: '12px',
+            border: '2px solid var(--tube-border)',
+            background: 'var(--bg-color)',
+            color: 'var(--text-color)',
+            outline: 'none',
+            marginBottom: '20px',
+            textAlign: 'center'
+          }}
+        />
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          {profile.playerName && (
+            <button
+              onClick={() => { setShowNameDialog(false); setPendingGoToGame(false); }}
+              style={{ padding: '12px 24px', borderRadius: '12px', background: 'var(--panel-bg)', border: '1px solid var(--tube-border)', fontSize: '1rem' }}
+            >
+              Abbrechen
+            </button>
+          )}
+          <button
+            onClick={saveName}
+            disabled={!nameInput.trim()}
+            style={{ padding: '12px 28px', borderRadius: '12px', background: 'var(--btn-bg)', fontSize: '1rem', fontWeight: 'bold', opacity: nameInput.trim() ? 1 : 0.5 }}
+          >
+            Speichern
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   const LeaderboardView = () => {
     const records = storageService.getLeaderboard().filter(r => r.levelId === currentLevelId);
@@ -330,16 +429,16 @@ function App() {
               playClick();
             }}
             style={{ 
-              padding: '8px 12px', 
-              borderRadius: '12px', 
-              background: 'var(--panel-bg)', 
-              color: 'var(--text-color)', 
-              border: '1px solid var(--tube-border)',
+              opacity: 0,
+              width: '20px',
+              height: '40px',
               cursor: 'pointer',
-              fontSize: '14px',
-              outline: 'none'
+              border: 'none',
+              background: 'transparent',
+              position: 'absolute',
+              left: '10px',
+              zIndex: 10
             }}
-            title="Level auswählen (Test)"
           >
             {levelsData.map(l => (
               <option key={l.id} value={l.id}>Level {l.id}</option>
@@ -373,10 +472,23 @@ function App() {
       <main className="main-content">
         {currentView === 'menu' && (
           <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '20px', width: '100%', maxWidth: '400px' }}>
-            <h1 style={{ fontSize: '3rem', marginBottom: '20px', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>Hauptmenü</h1>
-            
+            {profile.playerName ? (
+              <div style={{ marginBottom: '10px' }}>
+                <p style={{ fontSize: '1.1rem', opacity: 0.7, marginBottom: '4px' }}>Willkommen zurück</p>
+                <h1 style={{ fontSize: '2.6rem', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>Hallo {profile.playerName}! 👋</h1>
+                <button
+                  onClick={() => { playClick(); openNameDialog(); }}
+                  style={{ marginTop: '8px', fontSize: '0.85rem', opacity: 0.5, textDecoration: 'underline', background: 'transparent', border: 'none', color: 'var(--text-color)', cursor: 'pointer' }}
+                >
+                  Name ändern
+                </button>
+              </div>
+            ) : (
+              <h1 style={{ fontSize: '3rem', marginBottom: '10px', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>Hauptmenü</h1>
+            )}
+
             <button 
-              onClick={() => { playClick(); setCurrentLevelId(profile.highestLevel); setCurrentView('game'); }} 
+              onClick={handleStartGame} 
               style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', fontSize: '1.5rem', padding: '20px', background: 'var(--btn-bg)', borderRadius: '16px', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(0,0,0,0.4)' }}
             >
               <PlayCircle size={32} /> {profile.highestLevel > 1 ? `Weiter mit Level ${profile.highestLevel}` : 'Starte Level 1'}
@@ -405,6 +517,15 @@ function App() {
               <Settings size={24} /> Einstellungen
             </button>
 
+            {!profile.playerName && (
+              <button 
+                onClick={() => { playClick(); openNameDialog(); }} 
+                style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', fontSize: '1.2rem', padding: '15px', background: 'var(--panel-bg)', border: '2px solid var(--tube-border)', borderRadius: '12px' }}
+              >
+                <User size={24} /> Name eingeben
+              </button>
+            )}
+
           </div>
         )}
 
@@ -428,6 +549,7 @@ function App() {
         {currentView === 'settings' && <SettingsView />}
         {currentView === 'completion' && <CompletionView />}
       </main>
+      {showNameDialog && <NameDialog />}
     </div>
   );
 }
