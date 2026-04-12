@@ -420,30 +420,45 @@ function App() {
       <header className="app-header">
         <h1 className="header-title">Ball Sort</h1>
         <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <select 
-            value={currentLevelId} 
-            onChange={(e) => { 
-              const id = parseInt(e.target.value);
-              setCurrentLevelId(id);
-              setCurrentView('game');
-              playClick();
-            }}
-            style={{ 
-              opacity: 0,
-              width: '20px',
-              height: '40px',
-              cursor: 'pointer',
-              border: 'none',
-              background: 'transparent',
-              position: 'absolute',
-              left: '10px',
-              zIndex: 10
-            }}
-          >
-            {levelsData.map(l => (
-              <option key={l.id} value={l.id}>Level {l.id}</option>
-            ))}
-          </select>
+          <div style={{ position: 'relative', width: '20px', height: '40px' }}>
+            <div style={{ 
+              position: 'absolute', 
+              top: '50%', 
+              left: '50%', 
+              transform: 'translate(-50%, -50%)', 
+              width: '3px', 
+              height: '3px', 
+              backgroundColor: 'white', 
+              borderRadius: '50%', 
+              opacity: 0.3,
+              pointerEvents: 'none' 
+            }} />
+            <select 
+              value={currentLevelId} 
+              onChange={(e) => { 
+                const id = parseInt(e.target.value);
+                setCurrentLevelId(id);
+                setCurrentView('game');
+                playClick();
+              }}
+              style={{ 
+                opacity: 0,
+                width: '100%',
+                height: '100%',
+                cursor: 'pointer',
+                border: 'none',
+                background: 'transparent',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                zIndex: 10
+              }}
+            >
+              {levelsData.map(l => (
+                <option key={l.id} value={l.id}>Level {l.id}</option>
+              ))}
+            </select>
+          </div>
           <button 
             onClick={toggleFullscreen} 
             title="Vollbild" 
