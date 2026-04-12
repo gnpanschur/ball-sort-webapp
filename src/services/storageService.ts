@@ -21,6 +21,7 @@ export const storageService = {
            audioVolume: parsed.audioVolume ?? 0.5,
            totalTimePerLevel: parsed.totalTimePerLevel ?? {},
            background: parsed.background ?? 'default',
+           playerName: parsed.playerName,
          };
 
          // TEMPORARY: Unlocking Level 11 for testing
@@ -44,6 +45,7 @@ export const storageService = {
       audioVolume: 0.5,
       totalTimePerLevel: {},
       background: 'default',
+      playerName: undefined,
     };
   },
 
