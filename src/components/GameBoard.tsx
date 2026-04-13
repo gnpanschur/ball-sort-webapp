@@ -3,7 +3,7 @@ import { Tube } from './Tube';
 import { useGameEngine } from '../hooks/useGameEngine';
 import { useWakeLock } from '../hooks/useWakeLock';
 import type { LevelData } from '../types/game';
-import { Undo2, RotateCcw, Play } from 'lucide-react';
+import { Undo2, RotateCcw, Play, Home } from 'lucide-react';
 
 interface GameBoardProps {
   level: LevelData;
@@ -13,9 +13,10 @@ interface GameBoardProps {
   onTubeComplete?: () => void;
   onWin?: () => void;
   onTimeUpdate?: (seconds: number) => void;
+  onExit?: () => void;
 }
 
-export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, onNextLevel, onMove, onTubeComplete, onWin, onTimeUpdate }) => {
+export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, onNextLevel, onMove, onTubeComplete, onWin, onTimeUpdate, onExit }) => {
   const { gameState, selectedTubeId, handleTubeClick, undoMove, restartLevel, setGameState } = useGameEngine(level, onMove);
   const lastInteractionRef = useRef(Date.now());
   const { requestLock, releaseLock } = useWakeLock();
@@ -189,18 +190,27 @@ export const GameBoard: React.FC<GameBoardProps> = ({ level, onLevelComplete, on
       {/* Win Modal */}
       {showWinModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100, backdropFilter: 'blur(5px)', padding: '20px' }}>
-          <h1 style={{ color: '#00ffcc', fontSize: '4rem', marginBottom: '20px', textShadow: '0 0 20px #00ffcc', textAlign: 'center', lineHeight: '1.2' }}>Level geschafft!</h1>
+          <h1 style={{ color: 'white', fontSize: '4rem', marginBottom: '20px', textShadow: '0 0 20px rgba(255,255,255,0.5)', textAlign: 'center', lineHeight: '1.2' }}>Level geschafft!</h1>
           <div style={{ fontSize: '1.8rem', marginBottom: '40px', textAlign: 'center' }}>
             <p>Züge: {gameState.moves}</p>
             <p>Zeit: {gameState.timeElapsed}s</p>
           </div>
           <button 
              onClick={onNextLevel} 
-             style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', padding: '15px 40px', background: 'var(--btn-bg)', border: 'none', borderRadius: '12px', color: 'var(--btn-text)', cursor: 'pointer', transition: 'background 0.3s' }}
+             style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', padding: '15px 40px', background: 'var(--btn-bg)', border: 'none', borderRadius: '12px', color: 'var(--btn-text)', cursor: 'pointer', transition: 'background 0.3s', marginBottom: '15px' }}
              onMouseEnter={e => e.currentTarget.style.background = 'var(--btn-bg-hover)'}
              onMouseLeave={e => e.currentTarget.style.background = 'var(--btn-bg)'}
           >
             Nächstes Level <Play />
+          </button>
+          
+          <button 
+             onClick={onExit} 
+             style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.2rem', padding: '12px 30px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', color: 'white', cursor: 'pointer', transition: 'background 0.3s' }}
+             onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+             onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+          >
+            Menü <Home size={20} />
           </button>
         </div>
       )}

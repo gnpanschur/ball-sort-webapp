@@ -21,6 +21,28 @@ function App() {
   const [currentView, setCurrentView] = useState<'menu' | 'game' | 'leaderboard' | 'settings' | 'completion'>('menu');
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [nameInput, setNameInput] = useState('');
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Bestätigen',
+    cancelText: 'Abbrechen',
+    onConfirm: () => {}
+  });
+
+  const showConfirm = (title: string, message: string, onConfirm: () => void, confirmText = 'Bestätigen', cancelText = 'Abbrechen') => {
+    setConfirmConfig({
+      isOpen: true,
+      title,
+      message,
+      confirmText,
+      cancelText,
+      onConfirm: () => {
+        onConfirm();
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+      }
+    });
+  };
 
   const { playClick, playWin, playPour, playTubeComplete, playCongratulations } = useAudio(profile);
 
@@ -29,6 +51,13 @@ function App() {
     storageService.saveProfile(profile);
     document.documentElement.setAttribute('data-theme', profile.theme);
   }, [profile]);
+
+  // Track last played level when it changes in game view
+  useEffect(() => {
+    if (currentView === 'game' && currentLevelId !== profile.lastPlayedLevel) {
+      setProfile(p => ({ ...p, lastPlayedLevel: currentLevelId }));
+    }
+  }, [currentLevelId, currentView, profile.lastPlayedLevel]);
 
   const currentLevel = levelsData.find((l) => l.id === currentLevelId) as LevelData;
 
@@ -40,6 +69,7 @@ function App() {
     setProfile(p => ({
       ...p,
       highestLevel: Math.max(p.highestLevel, currentLevelId + 1 > levelsData.length ? levelsData.length : currentLevelId + 1),
+      lastPlayedLevel: Math.max(p.lastPlayedLevel ?? 1, currentLevelId + 1 > levelsData.length ? levelsData.length : currentLevelId + 1),
       completedLevels: Array.from(new Set([...p.completedLevels, currentLevelId])),
       bestTimes: (!p.bestTimes[currentLevelId] || p.bestTimes[currentLevelId] > time) 
         ? { ...p.bestTimes, [currentLevelId]: time } 
@@ -70,36 +100,55 @@ function App() {
   };
 
   // Open name dialog to collect name; optionally navigate to game after saving
-  const openNameDialog = (thenStartGame?: boolean) => {
+  const openNameDialog = () => {
     setNameInput(profile.playerName || '');
     setShowNameDialog(true);
-    if (thenStartGame) {
-      // store intent: after save go to game
-      setPendingGoToGame(true);
-    }
   };
-  const [pendingGoToGame, setPendingGoToGame] = useState(false);
 
   const saveName = () => {
     const trimmed = nameInput.trim();
     if (!trimmed) return;
     setProfile(p => ({ ...p, playerName: trimmed }));
     setShowNameDialog(false);
-    if (pendingGoToGame) {
-      setPendingGoToGame(false);
-      setCurrentLevelId(profile.highestLevel);
-      setCurrentView('game');
-    }
   };
 
-  const handleStartGame = () => {
-    playClick();
-    if (!profile.playerName) {
-      openNameDialog(true);
-    } else {
-      setCurrentLevelId(profile.highestLevel);
-      setCurrentView('game');
-    }
+
+  const handleRestartFromZero = () => {
+    showConfirm(
+      'Neustart?',
+      'Möchtest du wirklich ganz von vorne anfangen? Dein gesamter Fortschritt und deine Spielzeit werden gelöscht.',
+      () => {
+        playClick();
+        setProfile(p => ({
+          ...p,
+          highestLevel: 1,
+          lastPlayedLevel: 1,
+          completedLevels: [],
+          totalTimePerLevel: {},
+          bestTimes: {},
+          bestMoves: {}
+        }));
+        setCurrentLevelId(1);
+        setCurrentView('game');
+      },
+      'Ganz von vorne anfangen'
+    );
+  };
+
+  const handleResetGame = () => {
+    showConfirm(
+      'Alles zurücksetzen?',
+      'Möchtest du das Spiel wirklich komplett zurücksetzen? Dein gesamter Fortschritt geht verloren.',
+      () => {
+        playClick();
+        storageService.resetAllData();
+        const freshProfile = storageService.getProfile();
+        setProfile(freshProfile);
+        setCurrentLevelId(freshProfile.highestLevel);
+        setCurrentView('menu');
+      },
+      'Jetzt zurücksetzen'
+    );
   };
 
   // Name Dialog Modal
@@ -121,7 +170,7 @@ function App() {
         textAlign: 'center',
         boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
       }}>
-        <User size={48} style={{ marginBottom: '16px', color: 'var(--btn-bg)' }} />
+        <User size={48} style={{ marginBottom: '16px', color: 'white' }} />
         <h2 style={{ marginBottom: '10px', fontSize: '1.6rem' }}>Wie heißt du?</h2>
         <p style={{ opacity: 0.7, marginBottom: '24px', fontSize: '0.95rem' }}>Dein Name erscheint in der Rangliste.</p>
         <input
@@ -148,7 +197,7 @@ function App() {
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
           {profile.playerName && (
             <button
-              onClick={() => { setShowNameDialog(false); setPendingGoToGame(false); }}
+              onClick={() => { setShowNameDialog(false); }}
               style={{ padding: '12px 24px', borderRadius: '12px', background: 'var(--panel-bg)', border: '1px solid var(--tube-border)', fontSize: '1rem' }}
             >
               Abbrechen
@@ -166,33 +215,112 @@ function App() {
     </div>
   );
 
-  const LeaderboardView = () => {
-    const records = storageService.getLeaderboard().filter(r => r.levelId === currentLevelId);
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const [sliderValue, setSliderValue] = useState(0);
-    const totalLevels = levelsData.length;
-
-    // Sync range slider -> scroll
-    const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = parseInt(e.target.value);
-      setSliderValue(val);
-      if (scrollRef.current) {
-        const max = scrollRef.current.scrollWidth - scrollRef.current.clientWidth;
-        scrollRef.current.scrollLeft = (val / 100) * max;
-      }
-    };
-
-    // Sync scroll -> range slider
-    const handleScroll = () => {
-      if (scrollRef.current) {
-        const max = scrollRef.current.scrollWidth - scrollRef.current.clientWidth;
-        if (max > 0) setSliderValue(Math.round((scrollRef.current.scrollLeft / max) * 100));
-      }
-    };
+  // Custom Confirm Dialog Modal
+  const ConfirmDialog = () => {
+    if (!confirmConfig.isOpen) return null;
 
     return (
-      <div style={{ padding: '20px', width: '100%', maxWidth: '600px', margin: '0 auto', background: 'var(--panel-bg)', borderRadius: '16px' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '15px' }}>Rangliste (Level {currentLevelId})</h2>
+      <div className="animate-fade-in" style={{
+        position: 'fixed', inset: 0,
+        background: 'rgba(0,0,0,0.82)',
+        backdropFilter: 'blur(10px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 1100
+      }}>
+        <div className="animate-scale-in" style={{
+          background: 'rgba(25, 25, 35, 0.95)',
+          border: '1px solid rgba(255, 255, 255, 0.15)',
+          borderRadius: '28px',
+          padding: '44px 36px',
+          maxWidth: '440px',
+          width: '92%',
+          textAlign: 'center',
+          boxShadow: '0 30px 70px rgba(0,0,0,0.8)',
+          position: 'relative'
+        }}>
+          <h2 style={{ fontSize: '2.1rem', marginBottom: '16px', color: 'white', fontWeight: '800' }}>{confirmConfig.title}</h2>
+          <p style={{ fontSize: '1.05rem', marginBottom: '36px', opacity: 0.85, lineHeight: '1.6', color: 'white' }}>{confirmConfig.message}</p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <button
+              onClick={confirmConfig.onConfirm}
+              style={{
+                padding: '18px',
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, #ff3b6b, #ff0844)',
+                color: 'white',
+                fontSize: '1.15rem',
+                fontWeight: 'bold',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: '0 8px 20px rgba(255, 8, 68, 0.3)'
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.03)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              {confirmConfig.confirmText}
+            </button>
+            <button
+              onClick={() => { playClick(); setConfirmConfig(prev => ({ ...prev, isOpen: false })); }}
+              style={{
+                padding: '16px',
+                borderRadius: '16px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                color: 'white',
+                fontSize: '1.05rem',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'; e.currentTarget.style.color = 'white'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'; e.currentTarget.style.color = 'white'; }}
+            >
+              {confirmConfig.cancelText}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+    const LeaderboardView = () => {
+      const records = storageService.getLeaderboard().filter(r => r.levelId === currentLevelId);
+      const scrollRef = useRef<HTMLDivElement>(null);
+      const [sliderValue, setSliderValue] = useState(0);
+      const totalLevels = levelsData.length;
+
+      const totalSeconds = Object.values(profile.totalTimePerLevel).reduce((sum, sec) => sum + sec, 0);
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const h = Math.floor(totalSeconds / 3600);
+      const m = Math.floor((totalSeconds % 3600) / 60);
+      const s = totalSeconds % 60;
+      const totalTimeStr = `${h > 0 ? h + 'h ' : ''}${pad(m)}m ${pad(s)}s`;
+
+      // Sync range slider -> scroll
+      const handleSlider = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = parseInt(e.target.value);
+        setSliderValue(val);
+        if (scrollRef.current) {
+          const max = scrollRef.current.scrollWidth - scrollRef.current.clientWidth;
+          scrollRef.current.scrollLeft = (val / 100) * max;
+        }
+      };
+
+      // Sync scroll -> range slider
+      const handleScroll = () => {
+        if (scrollRef.current) {
+          const max = scrollRef.current.scrollWidth - scrollRef.current.clientWidth;
+          if (max > 0) setSliderValue(Math.round((scrollRef.current.scrollLeft / max) * 100));
+        }
+      };
+
+      return (
+        <div style={{ padding: '20px', width: '100%', maxWidth: '600px', margin: '0 auto', background: 'var(--panel-bg)', borderRadius: '16px' }}>
+          <h2 style={{ textAlign: 'center', marginBottom: '5px' }}>Rangliste (Level {currentLevelId})</h2>
+          <div style={{ textAlign: 'center', marginBottom: '15px', opacity: 0.9, fontSize: '0.9rem', color: 'white' }}>
+            Deine gesamte Spielzeit: <strong>{totalTimeStr}</strong>
+          </div>
 
         {/* Level buttons with hidden overflow, controlled by slider */}
         <div
@@ -284,8 +412,7 @@ function App() {
            onChange={e => { playClick(); setProfile({...profile, background: e.target.value}); }}
            style={{ padding: '10px', borderRadius: '8px', background: 'var(--bg-color)', color: 'var(--text-color)', border: '1px solid var(--tube-border)', width: '100%', maxWidth: '300px' }}
         >
-          <option value="default">Standard (Design-Farbe)</option>
-          <option value="Grün01.webp">Grün 1</option>
+          <option value="Grün01.webp">Standard (Grün 1)</option>
           <option value="Grün02.webp">Grün 2</option>
           <option value="Rot.webp">Rot</option>
           <option value="Violett.webp">Violett</option>
@@ -324,86 +451,181 @@ function App() {
   const CompletionView = () => {
     const totalSeconds = Object.values(profile.totalTimePerLevel).reduce((sum, sec) => sum + sec, 0);
 
-    const days = Math.floor(totalSeconds / (3600 * 24));
-    const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+    const days    = Math.floor(totalSeconds / 86400);
+    const hours   = Math.floor((totalSeconds % 86400) / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    // ---- Fireworks canvas effect (5 seconds) ----
     useEffect(() => {
       playCongratulations();
+
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const resize = () => {
+        canvas.width  = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+      };
+      resize();
+      window.addEventListener('resize', resize);
+
+      type Particle = {
+        x: number; y: number; vx: number; vy: number;
+        alpha: number; color: string; size: number;
+      };
+      const COLORS = [
+        '#ffd700','#ff4e50','#f9d423','#00e5ff',
+        '#ff6ec7','#39ff14','#ff8c00','#b47fff',
+      ];
+      const particles: Particle[] = [];
+
+      const launch = () => {
+        const x = Math.random() * canvas.width;
+        const y = (0.1 + Math.random() * 0.45) * canvas.height;
+        const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+        const count = 80 + Math.floor(Math.random() * 60);
+        for (let i = 0; i < count; i++) {
+          const angle = (Math.PI * 2 * i) / count + Math.random() * 0.3;
+          const speed = 2 + Math.random() * 5;
+          particles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            alpha: 1,
+            color,
+            size: 2 + Math.random() * 3,
+          });
+        }
+      };
+
+      // Launch immediately then every ~600ms
+      launch();
+      const launchInterval = setInterval(launch, 600);
+
+      let animId: number;
+      const draw = () => {
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.07; // gravity
+          p.vx *= 0.98;
+          p.alpha -= 0.016;
+
+          if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        animId = requestAnimationFrame(draw);
+      };
+      animId = requestAnimationFrame(draw);
+
+      // Stop launching after 5 seconds; let remaining particles fade out
+      const stopTimeout = setTimeout(() => {
+        clearInterval(launchInterval);
+      }, 5000);
+
+      return () => {
+        window.removeEventListener('resize', resize);
+        clearInterval(launchInterval);
+        clearTimeout(stopTimeout);
+        cancelAnimationFrame(animId);
+      };
     }, []);
+    // ---- End fireworks ----
+
+    const pad = (n: number) => String(n).padStart(2, '0');
 
     return (
-      <div className="animate-scale-in" style={{ 
-        padding: '40px', 
-        maxWidth: '800px', 
-        margin: '0 auto', 
-        background: 'rgba(255, 255, 255, 0.1)', 
-        backdropFilter: 'blur(20px)',
-        borderRadius: '32px', 
-        border: '1px solid rgba(255, 215, 0, 0.3)',
-        textAlign: 'center',
-        boxShadow: '0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(255, 215, 0, 0.2)'
-      }}>
-        <div className="animate-float" style={{ marginBottom: '30px' }}>
-          <Trophy size={120} color="#ffd700" style={{ filter: 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.5))' }} />
-        </div>
-        
-        <h1 className="animate-shine" style={{ fontSize: '4rem', marginBottom: '20px', fontWeight: 'bold' }}>
-          Gratulation!!
-        </h1>
-        
-        <p style={{ fontSize: '1.8rem', marginBottom: '40px', color: 'rgba(255, 255, 255, 0.9)' }}>
-          Du hast alle Levels geschafft in:
-        </p>
+      <div style={{ position: 'relative', width: '100%', minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', 
-          gap: '20px', 
-          marginBottom: '50px' 
-        }}>
-          {[
-            { label: 'Tage', value: days },
-            { label: 'Std.', value: hours },
-            { label: 'Min.', value: minutes },
-            { label: 'Sek.', value: seconds }
-          ].map((item, i) => (
-            <div key={i} className="animate-fade-in-scale" style={{ 
-              background: 'rgba(0, 0, 0, 0.3)', 
-              padding: '20px', 
-              borderRadius: '20px', 
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              animationDelay: `${0.2 + i * 0.1}s`
-            }}>
-              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#ffd700' }}>{item.value}</div>
-              <div style={{ fontSize: '1.2rem', opacity: 0.7 }}>{item.label}</div>
-            </div>
-          ))}
-        </div>
-
-        <button 
-          onClick={() => { playClick(); setCurrentView('menu'); }} 
-          style={{ 
-            padding: '15px 40px', 
-            fontSize: '1.5rem', 
-            background: 'linear-gradient(135deg, #ffd700, #ff8c00)', 
-            border: 'none', 
-            borderRadius: '16px', 
-            color: 'black', 
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            boxShadow: '0 10px 20px rgba(255, 140, 0, 0.3)'
+        {/* Fireworks canvas – fills the entire viewport behind the card */}
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: 'fixed', inset: 0,
+            width: '100%', height: '100%',
+            pointerEvents: 'none',
+            zIndex: 0,
           }}
-          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          Zurück zum Menü
-        </button>
+        />
+
+        {/* Congratulations card */}
+        <div className="animate-scale-in completion-card" style={{ position: 'relative', zIndex: 1 }}>
+
+          <div className="animate-float" style={{ marginBottom: '16px' }}>
+            <Trophy size={80} color="white" style={{ filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.7))' }} />
+          </div>
+
+          <h1 className="animate-shine completion-title">
+            Gratulation!! 🎉
+          </h1>
+
+          <p className="completion-subtitle">
+            Du hast alle Levels geschafft!
+          </p>
+
+          {/* Total time big display */}
+          <div className="completion-time-hero">
+            <span className="completion-time-value" style={{ color: 'white' }}>
+              {days > 0 && <>{days}d&nbsp;</>}
+              {pad(hours)}:{pad(minutes)}:{pad(seconds)}
+            </span>
+            <span className="completion-time-label">Gesamte Spielzeit</span>
+          </div>
+
+          {/* Time breakdown grid */}
+          <div className="completion-grid">
+            {[
+              { label: 'Tage',  value: days    },
+              { label: 'Std.',  value: hours   },
+              { label: 'Min.',  value: minutes },
+              { label: 'Sek.', value: seconds  },
+            ].map((item, i) => (
+              <div key={i} className="animate-fade-in-scale completion-cell"
+                style={{ animationDelay: `${0.2 + i * 0.1}s` }}>
+                <div className="completion-cell-value" style={{ color: 'white' }}>{item.value}</div>
+                <div className="completion-cell-label">{item.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
+            <button
+              className="completion-btn"
+              onClick={() => { playClick(); setCurrentView('menu'); }}
+              onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.05)'}
+              onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'}
+            >
+              Zurück zum Menü
+            </button>
+
+            <button
+              className="reset-game-btn"
+              onClick={handleResetGame}
+            >
+              Spiel komplett zurücksetzen
+            </button>
+          </div>
+        </div>
       </div>
     );
   };
+
+
 
   return (
     <div className="app-container" style={{ 
@@ -411,7 +633,7 @@ function App() {
       flexDirection: 'column', 
       height: '100vh', 
       width: '100vw',
-      backgroundImage: profile.background && profile.background !== 'default' ? `url('/Bilder/${profile.background}')` : 'none',
+      backgroundImage: `url('/Bilder/${profile.background || 'Grün01.webp'}')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
@@ -432,11 +654,15 @@ function App() {
             pointerEvents: 'none' 
           }} />
           <select 
-            value={currentLevelId} 
+            value={currentView === 'completion' ? 'completion' : currentLevelId} 
             onChange={(e) => { 
-              const id = parseInt(e.target.value);
-              setCurrentLevelId(id);
-              setCurrentView('game');
+              if (e.target.value === 'completion') {
+                setCurrentView('completion');
+              } else {
+                const id = parseInt(e.target.value);
+                setCurrentLevelId(id);
+                setCurrentView('game');
+              }
               playClick();
             }}
             style={{ 
@@ -455,6 +681,7 @@ function App() {
             {levelsData.map(l => (
               <option key={l.id} value={l.id}>Level {l.id}</option>
             ))}
+            <option value="completion">🎉 Congratulations</option>
           </select>
         </div>
         <h1 className="header-title">Ball Sort</h1>
@@ -475,7 +702,7 @@ function App() {
             onClick={() => { playClick(); window.close(); }} 
             aria-label="Beenden" 
             title="Spiel Beenden" 
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255, 50, 50, 0.2)', padding: '8px', borderRadius: '50%', color: '#ff3366', cursor: 'pointer', transition: 'background 0.2s', border: '1px solid rgba(255, 50, 50, 0.5)' }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255, 50, 50, 0.2)', padding: '8px', borderRadius: '50%', color: 'white', cursor: 'pointer', transition: 'background 0.2s', border: '1px solid rgba(255, 50, 50, 0.5)' }}
             onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 50, 50, 0.6)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 50, 50, 0.2)'}
           >
@@ -492,7 +719,7 @@ function App() {
                 <p style={{ fontSize: '1.1rem', opacity: 0.7, marginBottom: '4px' }}>Willkommen zurück</p>
                 <h1 style={{ fontSize: '2.6rem', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>Hallo {profile.playerName}! 👋</h1>
                 <button
-                  onClick={() => { playClick(); openNameDialog(); }}
+                  onClick={openNameDialog}
                   style={{ marginTop: '8px', fontSize: '0.85rem', opacity: 0.5, textDecoration: 'underline', background: 'transparent', border: 'none', color: 'var(--text-color)', cursor: 'pointer' }}
                 >
                   Name ändern
@@ -502,16 +729,28 @@ function App() {
               <h1 style={{ fontSize: '3rem', marginBottom: '10px', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>Hauptmenü</h1>
             )}
 
+            <div style={{ 
+              background: 'rgba(255, 255, 255, 0.05)', 
+              padding: '15px', 
+              borderRadius: '16px', 
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              marginBottom: '10px'
+            }}>
+              <p style={{ opacity: 0.7, fontSize: '0.9rem', marginBottom: '4px' }}>Aktueller Fortschritt</p>
+              <h2 style={{ fontSize: '1.8rem', color: 'white' }}>Level {profile.lastPlayedLevel || profile.highestLevel}</h2>
+            </div>
+
             <button 
-              onClick={handleStartGame} 
-              style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', fontSize: '1.5rem', padding: '20px', background: 'var(--btn-bg)', borderRadius: '16px', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(0,0,0,0.4)' }}
+              onClick={() => { playClick(); setCurrentLevelId(profile.lastPlayedLevel || profile.highestLevel); setCurrentView('game'); }} 
+              style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', fontSize: '1.5rem', padding: '20px', background: 'var(--btn-bg)', borderRadius: '16px', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(0,0,0,0.4)', marginBottom: '10px' }}
             >
-              <PlayCircle size={32} /> {profile.highestLevel > 1 ? `Weiter mit Level ${profile.highestLevel}` : 'Starte Level 1'}
+              <PlayCircle size={32} /> Jetzt Spielen
             </button>
+
             
             {profile.highestLevel > 1 && (
               <button 
-                onClick={() => { playClick(); setCurrentLevelId(1); setCurrentView('game'); }} 
+                onClick={handleRestartFromZero} 
                 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', fontSize: '1.2rem', padding: '15px', background: 'var(--panel-bg)', border: '2px solid var(--tube-border)', borderRadius: '12px', marginTop: '-10px' }}
               >
                 <PlayCircle size={24} /> Von Level 1 beginnen
@@ -557,6 +796,7 @@ function App() {
              onTubeComplete={playTubeComplete}
              onWin={playWin}
              onTimeUpdate={handleTimeUpdate}
+             onExit={() => { playClick(); setCurrentView('menu'); }}
           />
         )}
 
@@ -565,6 +805,7 @@ function App() {
         {currentView === 'completion' && <CompletionView />}
       </main>
       {showNameDialog && <NameDialog />}
+      <ConfirmDialog />
     </div>
   );
 }

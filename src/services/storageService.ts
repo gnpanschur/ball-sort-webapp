@@ -20,22 +20,18 @@ export const storageService = {
            audioEnabled: parsed.audioEnabled ?? true,
            audioVolume: parsed.audioVolume ?? 0.5,
            totalTimePerLevel: parsed.totalTimePerLevel ?? {},
+           lastPlayedLevel: parsed.lastPlayedLevel ?? parsed.highestLevel ?? 1,
            background: parsed.background ?? 'default',
            playerName: parsed.playerName,
          };
 
-         // TEMPORARY: Unlocking Level 11 for testing
-         if (profile.highestLevel < 11) {
-           profile.highestLevel = 11;
-           storageService.saveProfile(profile);
-         }
          return profile;
       } catch (e) {
          console.error('Failed to parse profile', e);
       }
     }
     return {
-      highestLevel: 11,
+      highestLevel: 1,
       completedLevels: [],
       bestTimes: {},
       bestMoves: {},
@@ -44,7 +40,7 @@ export const storageService = {
       audioEnabled: true,
       audioVolume: 0.5,
       totalTimePerLevel: {},
-      background: 'default',
+      background: 'Grün01.webp',
       playerName: undefined,
     };
   },
@@ -111,5 +107,10 @@ export const storageService = {
     // Let's just save the sorted list
     localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(leaderboard));
     return true;
+  },
+
+  resetAllData: (): void => {
+    localStorage.removeItem(PROFILE_KEY);
+    localStorage.removeItem(LEADERBOARD_KEY);
   }
 };

@@ -1,6 +1,7 @@
 [
   {
     "id": 1,
+    "description": "Sortiere die Kugeln so, dass in jedem Röhrchen nur eine Farbe ist.",
     "tubeCapacity": 4,
     "timeLimitSeconds": 0,
     "initialTubes": [

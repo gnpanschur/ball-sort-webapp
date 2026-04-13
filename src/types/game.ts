@@ -49,6 +49,7 @@ export interface UserProfile {
   audioEnabled: boolean;
   audioVolume: number;
   totalTimePerLevel: Record<number, number>; // levelId -> total accumulated seconds spent
+  lastPlayedLevel?: number;
   background?: string;
   playerName?: string;
 }
