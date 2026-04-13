@@ -112,5 +112,9 @@ export const storageService = {
   resetAllData: (): void => {
     localStorage.removeItem(PROFILE_KEY);
     localStorage.removeItem(LEADERBOARD_KEY);
+  },
+
+  clearLeaderboard: (): void => {
+    localStorage.removeItem(LEADERBOARD_KEY);
   }
 };

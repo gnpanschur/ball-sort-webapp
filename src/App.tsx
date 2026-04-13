@@ -119,6 +119,7 @@ function App() {
       'Möchtest du wirklich ganz von vorne anfangen? Dein gesamter Fortschritt und deine Spielzeit werden gelöscht.',
       () => {
         playClick();
+        storageService.clearLeaderboard();
         setProfile(p => ({
           ...p,
           highestLevel: 1,
