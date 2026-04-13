@@ -1379,6 +1379,7 @@
   {
     "_comment_start": "level 17 Anfang",
     "id": 17,
+    "description": "Alle Röhrchen müssen gleich viele Kugeln enthalten.",
     "tubeCapacity": 5,
     "timeLimitSeconds": 0,
     "moveSingleBallOnly": true,
